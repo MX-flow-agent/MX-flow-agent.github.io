@@ -4928,7 +4928,9 @@ h1,h2,h3,p,dl,dd{margin:0}
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span style="flex:0 0 108px;font-size:14px">Subsidiary</span>
           <select style="flex:1 1 140px;min-width:0;height:40px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:8px 12px;font-size:13px" value="{{ regionValue }}" onChange="{{ setRegion }}"><option>All regions</option><option>N.A</option><option>EU</option><option>L.A</option><option>KR</option><option>MENA</option><option>SEAO</option><option>SWA</option><option>CIS</option><option>CHN</option><option>AFR</option><option>JPN</option></select>
-          <select style="flex:1 1 140px;min-width:0;height:40px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:8px 12px;font-size:13px" value="{{ subsValue }}" onChange="{{ setSubs }}"><option>All subsidiaries</option><option selected="">SEG</option><option>SENA</option><option>SEAP</option><option>SEAO</option><option>SEA</option></select>
+          <!-- N.A lists only its own subsidiaries (240430_Subsi. List.xlsx); options are rendered, not hidden, since Safari ignores hidden <option>s -->
+          <sc-if value="{{ regionIsNA }}" hint-placeholder-val="{{ false }}"><select style="flex:1 1 140px;min-width:0;height:40px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:8px 12px;font-size:13px" value="{{ subsValue }}" onChange="{{ setSubs }}"><option>All subsidiaries</option><option>SEA</option><option>SECA</option></select></sc-if>
+          <sc-if value="{{ regionNotNA }}" hint-placeholder-val="{{ true }}"><select style="flex:1 1 140px;min-width:0;height:40px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:8px 12px;font-size:13px" value="{{ subsValue }}" onChange="{{ setSubs }}"><option>All subsidiaries</option><option>SEG</option><option>SENA</option><option>SEAP</option><option>SEAO</option><option>SEA</option><option>SECA</option></select></sc-if>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
           <span style="flex:0 0 108px;font-size:14px">Tier</span>
@@ -5363,7 +5365,7 @@ h1,h2,h3,p,dl,dd{margin:0}
               <span style="display:flex;gap:8px;align-items:center">
                 <span style="display:flex;align-items:center;height:36px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:6px 10px;box-sizing:border-box;font-size:13px;gap:6px;flex:0 0 110px"><img src="assets/{{ ob.icon }}.svg" width="16" height="16" alt="">{{ ob.channel }}</span>
                 <span style="display:flex;align-items:center;height:36px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:6px 10px;box-sizing:border-box;font-size:13px;gap:6px;flex:1 1 auto;min-width:0">{{ ob.postType }}</span>
-                <span style="display:flex;align-items:center;height:36px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:6px 10px;box-sizing:border-box;font-size:13px;gap:6px;flex:0 0 52px"><input type="text" inputmode="numeric" value="{{ ob.count }}" onChange="{{ ob.setCount }}" aria-label="{{ ob.channel }} posts" style="width:100%;min-width:0;border:0;outline:none;background:transparent;font-size:13px;font-variant-numeric:tabular-nums;text-align:right"></span>
+                <span style="display:flex;align-items:center;height:36px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:6px 10px;box-sizing:border-box;font-size:13px;gap:6px;flex:0 0 52px;position:relative"><input type="text" inputmode="numeric" value="{{ ob.count }}" onChange="{{ ob.setCount }}" onFocus="{{ ob.openSuggest }}" onBlur="{{ closeSuggest }}" aria-label="{{ ob.channel }} posts" style="width:100%;min-width:0;border:0;outline:none;background:transparent;font-size:13px;font-variant-numeric:tabular-nums;text-align:right"><sc-if value="{{ ob.suggestOpen }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:calc(100% + 4px);right:0;min-width:100%;z-index:5;display:flex;flex-direction:column;background:#fff;border:1px solid #cecece;border-radius:8px;box-shadow:2px 2px 8px 0 rgba(0,0,0,.15);padding:4px;box-sizing:border-box"><button type="button" onMouseDown="{{ ob.pickSuggest }}" style="border:0;background:transparent;border-radius:6px;padding:7px 10px;font-size:13px;font-variant-numeric:tabular-nums;text-align:left;white-space:nowrap;color:#263144" style-hover="background:#F3F3F3"><span style="color:rgba(38,49,68,.6);font-size:11px;margin-right:8px">Suggested</span><b style="font-weight:700">{{ ob.suggest }}</b></button></span></sc-if></span>
               </span>
             </sc-for>
             <span style="align-self:flex-end;font-size:12px;color:rgba(38,49,68,.6)">Total <b style="color:#0380FE;font-weight:700;font-variant-numeric:tabular-nums">{{ postTotal }}</b> Posts</span>
@@ -5397,9 +5399,9 @@ h1,h2,h3,p,dl,dd{margin:0}
         </sc-if>
         <div style="display:flex;align-items:center;gap:10px;margin:14px 0">
           <label style="flex:0 0 108px;font-size:13px" for="pay-amount">Total amount</label>
-          <span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:40px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:8px 12px;box-sizing:border-box">
+          <span style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;height:40px;border:1px solid #cecece;border-radius:8px;background:#fff;padding:8px 12px;box-sizing:border-box;position:relative">
             <span style="font-size:13px;color:rgba(38,49,68,.6)">$</span>
-            <input id="pay-amount" type="text" inputmode="numeric" placeholder="0" value="{{ amountValue }}" onChange="{{ setAmount }}" style="flex:1;min-width:0;border:0;outline:none;background:transparent;font-size:13px;font-variant-numeric:tabular-nums">
+            <input id="pay-amount" type="text" inputmode="numeric" placeholder="0" value="{{ amountValue }}" onChange="{{ setAmount }}" onFocus="{{ openAmountSuggest }}" onBlur="{{ closeSuggest }}" style="flex:1;min-width:0;border:0;outline:none;background:transparent;font-size:13px;font-variant-numeric:tabular-nums"><sc-if value="{{ amountSuggestOpen }}" hint-placeholder-val="{{ false }}"><span style="position:absolute;top:calc(100% + 4px);left:0;min-width:100%;z-index:5;display:flex;flex-direction:column;background:#fff;border:1px solid #cecece;border-radius:8px;box-shadow:2px 2px 8px 0 rgba(0,0,0,.15);padding:4px;box-sizing:border-box"><button type="button" onMouseDown="{{ pickAmount }}" style="border:0;background:transparent;border-radius:6px;padding:7px 10px;font-size:13px;font-variant-numeric:tabular-nums;text-align:left;white-space:nowrap;color:#263144" style-hover="background:#F3F3F3"><span style="color:rgba(38,49,68,.6);font-size:11px;margin-right:8px">Suggested</span><b style="font-weight:700">{{ amountSuggest }}</b></button></span></sc-if>
           </span>
         </div>
         <sc-if value="{{ amountOk }}" hint-placeholder-val="{{ false }}"><p style="margin:-4px 0 12px"><span style="display:inline-flex;align-items:center;gap:6px;border-radius:1000px;padding:5px 12px;background:#D6FADC;color:#1F9A31;font-size:12px;line-height:1.4;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="display:block;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5 10 17.5 19 7"></path></svg>Within the recommended range</span></p></sc-if>
@@ -5658,7 +5660,7 @@ h1,h2,h3,p,dl,dd{margin:0}
 const TARGET = 2.30;
 const CANDS = [
   {img:'assets/thumbs/lillylucysisters.jpg',n:'Zina | Lilly & Lucy🐾',h:'lillylucysisters',f:96000,pr:1200000,er:168.29,pl:['IG','FB','TT'],v:1,th:['Pet care','Mental health','Mobile filmmaking'],cs:'none'},
-  {img:'assets/thumbs/kylenutt.jpg',n:'kyle nutt',h:'kylenutt',f:2200000,pr:26000000,er:26.52,pl:['IG','FB','YT','TT','X'],v:1,th:['Cinematic storytelling','Photography tutorials'],cs:'unclear'},
+  {img:'assets/thumbs/kylenutt.jpg',n:'kyle nutt',h:'kylenutt',f:2200000,pr:26000000,er:26.52,pl:['IG','FB','YT','TT','X'],v:1,th:['Cinematic storytelling','Photography tutorials','Mobile filmmaking'],cs:'unclear'},
   {img:'assets/thumbs/khaby00.jpg',n:'Khabane Lame',h:'khaby00',f:78100000,pr:937100000,er:1.77,pl:['IG'],v:1,th:['Comedy','Relatable fails'],cs:'unclear'},
   {img:'assets/thumbs/zachking.jpg',n:'Zach King',h:'zachking',f:31900000,pr:383100000,er:2.95,pl:['IG','FB','YT','X'],v:1,th:['Visual illusions','Magical realism'],cs:'seen'},
   {img:'assets/thumbs/brentrivera.jpg',n:'Brent Rivera',h:'brentrivera',f:23500000,pr:282400000,er:3.09,pl:['IG','FB','X'],v:1,th:['Relatable relationships','Sibling antics'],cs:'unclear'},
@@ -5808,6 +5810,13 @@ const DESC = {
 // The Running screen replays the run's tail: 62% → 100% in 4 s, then the results.
 const RUN_FROM = 62, RUN_MS = 4000, RUN_QS_DONE = 75, RUN_HOLD_MS = 300;
 const MUTED = 'rgba(38,49,68,.6)';
+// New search: every option is listed, but only these take; picking any other leaves the field as it was.
+const REGION_OK = ['All regions', 'N.A'];
+const SUBS_OK = ['All subsidiaries', 'SEA'];
+// Registration presets: the contract period is filled in (still editable); the posting
+// counts and the total amount are offered as suggestions under their fields.
+const PRESET_START = '2026.12.01', PRESET_END = '2027.12.31';
+const AMOUNT_SUGGEST = 7800;
 // Mockup toolbar views, in order — Brief Curator's model: every screen, plus the
 // states inside Run and Candidate. The number keys jump to SCREENS.
 const SCREENS = ['new', 'job', 'detail', 'reg'];
@@ -5860,7 +5869,7 @@ class Component extends DCLogic {
     pop: null, plats: {}, themes: {}, verifiedOnly: false, hidePending: false, payOpen: false,
     detailWho: 'lillylucysisters', briefPromptOpen: false, briefDismissed: false,
     fFollowers: 'Any followers', fEr: 'Any E/R', fComp: 'Competitor product: all', sort: 'Sort: Relevance',
-    view: 'grid', page: 1, amount: '', startDate: '', endDate: '',
+    view: 'grid', page: 1, amount: '', startDate: PRESET_START, endDate: PRESET_END, suggest: null,
     postCounts: DEAL.posts.map(() => ''),
     tbHidden: true, tbH: 0, // the toolbar starts hidden, as on Brief Curator
     region: 'All regions', subs: 'All subsidiaries', tier: 'All tiers', pp: 'All passion points',
@@ -5896,6 +5905,8 @@ class Component extends DCLogic {
     [['region', 'region'], ['subsidiary', 'subs'], ['tier', 'tier'], ['passion', 'pp']].forEach(([param, key]) => {
       if (q.get(param)) preset[key] = q.get(param);
     });
+    if (preset.region && !REGION_OK.includes(preset.region)) delete preset.region;
+    if (preset.subs && !SUBS_OK.includes(preset.subs)) delete preset.subs;
     if (Object.keys(preset).length) this.setState(preset);
   }
   componentWillUnmount() {
@@ -6063,7 +6074,7 @@ class Component extends DCLogic {
         n: c.n, h: c.h, ini: c.n.charAt(0).toUpperCase(), v: !!c.v, pending: !!c.pending,
         img: c.img || '', hasImg: !!c.img, noImg: !c.img,
         f: reach(c.f), pr: reach(c.pr), er: c.er.toFixed(2) + '%', vs: v.text, vsColor: v.color,
-        th: (c.th || []).slice(0, c.h === 'lillylucysisters' ? 3 : 2),
+        th: (c.th || []).slice(0, c.h === 'lillylucysisters' || c.h === 'kylenutt' ? 3 : 2),
         pl: CHAN.filter(ch => c.pl.includes(ch[0])).map(ch => ({ t: ch[1], icon: ch[2] })),
         sel, bg: sel ? '#E6F2FE' : '#fff', bc: sel ? '#0380FE' : '#cecece',
         csSeen: c.cs === 'seen', csUnclear: c.cs === 'unclear', csNone: c.cs !== 'seen' && c.cs !== 'unclear',
@@ -6108,8 +6119,11 @@ class Component extends DCLogic {
       runStage: s.runPct < RUN_QS_DONE ? 'Quality screening' : 'Profile analysis',
       qsActive: s.runPct < RUN_QS_DONE, qsDone: s.runPct >= RUN_QS_DONE,
       paPending: s.runPct < RUN_QS_DONE, paActive: s.runPct >= RUN_QS_DONE && s.runPct < 100, paDone: s.runPct >= 100,
-      regionValue: s.region, setRegion: e => this.setState({ region: e.target.value }),
-      subsValue: s.subs, setSubs: e => this.setState({ subs: e.target.value }),
+      regionValue: s.region, subsValue: s.subs,
+      regionIsNA: s.region === 'N.A', regionNotNA: s.region !== 'N.A',
+      // a choice outside REGION_OK / SUBS_OK is ignored; the controlled select snaps back
+      setRegion: e => { const v = e.target.value; if (REGION_OK.includes(v)) this.setState({ region: v }); else this.forceUpdate(); },
+      setSubs: e => { const v = e.target.value; if (SUBS_OK.includes(v)) this.setState({ subs: v }); else this.forceUpdate(); },
       tierValue: s.tier, setTier: e => this.setState({ tier: e.target.value }),
       ppValue: s.pp, setPP: e => this.setState({ pp: e.target.value }),
       goNew: go('new'), goJob: go('job'), goReg: go('reg'), startRun: go('job', 'running'),
@@ -6175,14 +6189,18 @@ class Component extends DCLogic {
       setAmount: e => this.setState({ amount: e.target.value }),
       obligations: DEAL.posts.map((p, i) => ({
         channel: p[0], postType: p[1], icon: p[3], count: s.postCounts[i],
+        // suggestion: the contracted post count (Instagram 2, Tiktok 1)
+        suggest: String(p[2]), suggestOpen: s.suggest === 'ob' + i,
+        openSuggest: () => this.setState({ suggest: 'ob' + i }),
+        pickSuggest: e => { e.preventDefault(); this.setState(st => { const next = st.postCounts.slice(); next[i] = String(p[2]); return { postCounts: next, suggest: null }; }); },
         setCount: e => this.setState(st => { const next = st.postCounts.slice(); next[i] = e.target.value.replace(/[^0-9]/g, '').slice(0, 3); return { postCounts: next }; })
       })),
-      amountOk: (() => {
-        if (!dealReady) return false;
-        const posts = postTotal;
-        const v = Number(String(s.amount).replace(/[^0-9.]/g, ''));
-        return !!v && v >= PAY.recMin * posts && v <= PAY.recMax * posts;
-      })(),
+      // the green note shows for the suggested amount only, picked or typed
+      amountOk: Number(String(s.amount).replace(/[^0-9.]/g, '')) === AMOUNT_SUGGEST,
+      amountSuggest: num(AMOUNT_SUGGEST), amountSuggestOpen: s.suggest === 'amount',
+      openAmountSuggest: () => this.setState({ suggest: 'amount' }),
+      pickAmount: e => { e.preventDefault(); this.setState({ amount: num(AMOUNT_SUGGEST), suggest: null }); },
+      closeSuggest: () => this.setState({ suggest: null }),
       perfByChannel: (() => {
         const metrics = [
           ['Avg. likes', v => num(v)], ['Avg. comments', v => num(v)],
