@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flow Agent</title>
+<!-- Flow Agent · entry point. Opens on Performance Analyst and hosts the flow in
+     one full-window frame, so the address bar stays on the site root while
+     people move between Performance Analyst, Influencer Recruiter and Brief
+     Curator. Each page still works on its own at its own address. -->
+<style>
+  html, body { margin: 0; height: 100%; background: #FBFBFB; }
+  #flow { display: block; width: 100%; height: 100%; border: 0; }
+</style>
+</head>
+<body>
+<iframe id="flow" src="PA-demo-v4.html" title="Flow Agent"></iframe>
+<script>
+  // The tab title follows the page inside the frame.
+  var flow = document.getElementById('flow');
+  flow.addEventListener('load', function () {
+    try { document.title = flow.contentDocument.title || 'Flow Agent'; } catch (e) {}
+    try { flow.contentWindow.focus(); } catch (e) {} // keyboard shortcuts work without a first click
+  });
+</script>
+</body>
+</html>
