@@ -72,6 +72,11 @@
     rail.hidden = !open;
     if (pushed) pushed.style.marginLeft = open ? W + 'px' : '';
     document.documentElement.style.setProperty('--flow-rail-w', open ? W + 'px' : '0px');
+    // The ☰ steps aside while the rail is open (the rail has its own ✕), as in PA.
+    Array.prototype.forEach.call(document.querySelectorAll('[data-flow-rail="open"]'), function (b) {
+      b.style.visibility = open ? 'hidden' : '';
+      b.setAttribute('aria-expanded', String(open));
+    });
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest && e.target.closest('[data-flow-rail]');

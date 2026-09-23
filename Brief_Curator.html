@@ -28,10 +28,10 @@
              blank Campaign Info (#campaign).
 
      Differences from the running app, on purpose:
-       · AIM rail (Sidebar) is the shared one, shared/flow-rail.js, opened
-         from the ☰ beside the title — the same rail Influencer Recruiter draws
-       · no host utility bar — MxPageShell only draws it for a page that
-         passes its own `nav`, which Brief Curator does not
+       · top bar is Performance Analyst's (shared/flow-topbar.css), so all
+         three agents share one bar; its ☰ opens the AIM rail
+       · AIM rail (Sidebar) is the shared one, shared/flow-rail.js — the same
+         rail Influencer Recruiter draws
        · content is representative, not a real generation; the roster,
          campaigns and the two extra guides are synthetic
        · generation runs in ~5 s instead of ~1 min
@@ -3753,7 +3753,6 @@ button { font-family: inherit; }
 .bc-field { display: grid; gap: 6px; min-width: 0; }
 .bc-label { display: flex; align-items: center; gap: 8px; font: 500 14px/1.4 var(--mm-font-body); color: var(--bc-ink); }
 .bc-label .ic { width: 16px; height: 16px; color: var(--bc-ink-2); }
-.bc-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .bc-hint { font: 400 12px/1.4 var(--mm-font-body); color: var(--bc-ink-2); }
 .bc-input, .bc-select, .bc-textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--bc-line); border-radius: var(--mm-radius-lg); background: var(--bc-surface); color: var(--bc-ink); font: 400 14px/1.4 var(--mm-font-body); transition: border-color 120ms; }
 .bc-input, .bc-select { height: 40px; padding: 0 12px; }
@@ -3859,7 +3858,7 @@ button { font-family: inherit; }
 .bc-form-error { margin: 0; padding: 10px 14px; border-radius: var(--mm-radius-lg); background: var(--color-surface-danger-subtle); color: var(--color-text-danger); font: 400 14px/1.4 var(--mm-font-body); }
 
 /* Generating overlay — the work area below the sticky header. */
-.bc-gen { position: fixed; left: 0; right: 0; bottom: 0; top: var(--bc-header-h, 96px); z-index: 30; display: flex; align-items: center; justify-content: center; padding: 24px 24px calc(var(--bc-toolbar-h) + 24px); background: rgba(251, 251, 251, 0.96); }
+.bc-gen { position: fixed; left: 0; right: 0; bottom: 0; top: var(--bc-header-bottom, var(--bc-header-h, 96px)); z-index: 30; display: flex; align-items: center; justify-content: center; padding: 24px 24px calc(var(--bc-toolbar-h) + 24px); background: rgba(251, 251, 251, 0.96); }
 .bc-gen[hidden] { display: none; }
 .bc-gen.is-entering { animation: bc-fade 300ms var(--bc-ease) both; }
 @keyframes bc-fade { from { opacity: 0; } }
@@ -4145,6 +4144,7 @@ button { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) { .bc-brief-badge { transition: none; } }
 </style>
 <link rel="stylesheet" href="shared/flow-toolbar.css">
+<link rel="stylesheet" href="shared/flow-topbar.css">
 <script src="shared/flow-rail.js" data-current="brief" data-push=".mxmap-tokens" defer></script>
 </head>
 <body>
@@ -4235,12 +4235,24 @@ button { font-family: inherit; }
 <div class="mxmap-tokens flex min-h-screen" style="background: var(--color-background-default)">
   <div class="flex min-w-0 flex-1 flex-col">
 
+    <!-- Top bar: the same bar as Performance Analyst's (menu, then the host's
+         utility items). Styles: shared/flow-topbar.css. Keep in step with
+         Brief_Curator.html / Influencer_Recruiter.html. -->
+    <div class="flow-topbar">
+      <button type="button" class="flow-topbar__menu" data-flow-rail="open" aria-expanded="false" aria-label="Menu"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDAgLTEgQyAtMC41NTIgLTEgLTEgLTAuNTUyIC0xIDAgQyAtMSAwLjU1MiAtMC41NTIgMSAwIDEgTCAwIDAgTCAwIC0xIFogTSAxNiAxIEMgMTYuNTUyIDEgMTcgMC41NTIgMTcgMCBDIDE3IC0wLjU1MiAxNi41NTIgLTEgMTYgLTEgTCAxNiAwIEwgMTYgMSBaIE0gMCAwIEwgMCAxIEwgMTYgMSBMIDE2IDAgTCAxNiAtMSBMIDAgLTEgTCAwIDAgWiIgZmlsbD0iIzI2MzE0NCIgZmlsbC1ydWxlPSJub256ZXJvIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDQuMjY4IDYpIj48L3BhdGg+PHBhdGggZD0iTSAwIC0xIEMgLTAuNTUyIC0xIC0xIC0wLjU1MiAtMSAwIEMgLTEgMC41NTIgLTAuNTUyIDEgMCAxIEwgMCAwIEwgMCAtMSBaIE0gMTYgMSBDIDE2LjU1MiAxIDE3IDAuNTUyIDE3IDAgQyAxNyAtMC41NTIgMTYuNTUyIC0xIDE2IC0xIEwgMTYgMCBMIDE2IDEgWiBNIDAgMCBMIDAgMSBMIDE2IDEgTCAxNiAwIEwgMTYgLTEgTCAwIC0xIEwgMCAwIFoiIGZpbGw9IiMyNjMxNDQiIGZpbGwtcnVsZT0ibm9uemVybyIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMSA0LjI2OCAxMikiPjwvcGF0aD48cGF0aCBkPSJNIDAgLTEgQyAtMC41NTIgLTEgLTEgLTAuNTUyIC0xIDAgQyAtMSAwLjU1MiAtMC41NTIgMSAwIDEgTCAwIDAgTCAwIC0xIFogTSAxNiAxIEMgMTYuNTUyIDEgMTcgMC41NTIgMTcgMCBDIDE3IC0wLjU1MiAxNi41NTIgLTEgMTYgLTEgTCAxNiAwIEwgMTYgMSBaIE0gMCAwIEwgMCAxIEwgMTYgMSBMIDE2IDAgTCAxNiAtMSBMIDAgLTEgTCAwIDAgWiIgZmlsbD0iIzI2MzE0NCIgZmlsbC1ydWxlPSJub256ZXJvIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDQuMjY4IDE4KSI+PC9wYXRoPjwvc3ZnPg==" width="32" height="32" alt=""></button>
+      <div class="flow-topbar__items">
+        <div class="flow-topbar__item" title="admin (ALL)"><span class="flow-topbar__label">admin (ALL)</span><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj48cmVjdCB4PSI2LjUiIHk9IjQiIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIHJ4PSIzIiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiI+PC9yZWN0PjxwYXRoIGQ9Ik04LjUgMTNDNi4yNzc3NyAxMyA0LjUgMTUgNC41IDE3IiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48L3BhdGg+PGNpcmNsZSBjeD0iMTUuNSIgY3k9IjE1IiByPSIzIiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiI+PC9jaXJjbGU+PHBhdGggZD0iTTE1LjUgMTEuNVYxME0xMiAxNUgxMC41TTE1LjUgMTguNVYyME0xOSAxNUgyMC41IiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48L3BhdGg+PHBhdGggZD0iTTE3Ljk3NDkgMTIuNTI1MUwxOS4wMzU1IDExLjQ2NDVNMTMuMDI1MSAxMi41MjUxTDExLjk2NDUgMTEuNDY0NU0xMy4wMjUxIDE3LjQ3NDlMMTEuOTY0NSAxOC41MzU2TTE3Ljk3NDkgMTcuNDc0OUwxOS4wMzU1IDE4LjUzNTYiIHN0cm9rZT0iIzI2MzE0NCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvcGF0aD48L3N2Zz4=" width="24" height="24" alt=""></div>
+        <div class="flow-topbar__item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDQgOCBMIDQgMTEgQyA0IDExLjE1NiAzLjk2NCAxMS4zMDkgMy44OTQgMTEuNDQ4IEwgMi42MiAxNCBMIDE3LjM4NCAxNCBMIDE2LjEwOCAxMS40NDggQyAxNi4wMzggMTEuMzA5IDE2LjAwMSAxMS4xNTYgMTYgMTEgTCAxNiA4IEMgMTYgNi40MDkgMTUuMzY4IDQuODgzIDE0LjI0MyAzLjc1NyBDIDEzLjExNyAyLjYzMiAxMS41OTEgMiAxMCAyIEMgOC40MDkgMiA2Ljg4MyAyLjYzMiA1Ljc1NyAzLjc1NyBDIDQuNjMyIDQuODgzIDQgNi40MDkgNCA4IFogTSA2IDE2IEwgMSAxNiBDIDAuODI5IDE2IDAuNjYyIDE1Ljk1NiAwLjUxMyAxNS44NzMgQyAwLjM2NCAxNS43OSAwLjIzOSAxNS42NyAwLjE0OSAxNS41MjUgQyAwLjA2IDE1LjM4IDAuMDA5IDE1LjIxNSAwLjAwMSAxNS4wNDQgQyAtMC4wMDcgMTQuODc0IDAuMDMgMTQuNzA0IDAuMTA2IDE0LjU1MiBMIDIgMTAuNzY0IEwgMiA4IEMgMiA1Ljg3OCAyLjg0MyAzLjg0MyA0LjM0MyAyLjM0MyBDIDUuODQzIDAuODQzIDcuODc4IDAgMTAgMCBDIDEyLjEyMiAwIDE0LjE1NyAwLjg0MyAxNS42NTcgMi4zNDMgQyAxNy4xNTcgMy44NDMgMTggNS44NzggMTggOCBMIDE4IDEwLjc2NCBMIDE5Ljg5NCAxNC41NTIgQyAxOS45NyAxNC43MDQgMjAuMDA3IDE0Ljg3NCAxOS45OTkgMTUuMDQ0IEMgMTkuOTkxIDE1LjIxNSAxOS45NCAxNS4zOCAxOS44NTEgMTUuNTI1IEMgMTkuNzYxIDE1LjY3IDE5LjYzNiAxNS43OSAxOS40ODcgMTUuODczIEMgMTkuMzM4IDE1Ljk1NiAxOS4xNyAxNiAxOSAxNiBMIDE0IDE2IEMgMTQgMTcuMDYxIDEzLjU3OSAxOC4wNzggMTIuODI4IDE4LjgyOCBDIDEyLjA3OCAxOS41NzkgMTEuMDYxIDIwIDEwIDIwIEMgOC45MzkgMjAgNy45MjIgMTkuNTc5IDcuMTcyIDE4LjgyOCBDIDYuNDIxIDE4LjA3OCA2IDE3LjA2MSA2IDE2IFogTSAxMiAxNiBMIDggMTYgQyA4IDE2LjUzIDguMjExIDE3LjAzOSA4LjU4NiAxNy40MTQgQyA4Ljk2MSAxNy43ODkgOS40NyAxOCAxMCAxOCBDIDEwLjUzIDE4IDExLjAzOSAxNy43ODkgMTEuNDE0IDE3LjQxNCBDIDExLjc4OSAxNy4wMzkgMTIgMTYuNTMgMTIgMTYgWiIgZmlsbD0iIzI2MzE0NCIgZmlsbC1ydWxlPSJub256ZXJvIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDIgMikiPjwvcGF0aD48L3N2Zz4=" width="32" height="32" alt=""></div>
+        <div class="flow-topbar__item" title="User Manual"><span class="flow-topbar__label">User Manual</span><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDAgOCBDIDAgMy41ODIgMy41ODIgMCA4IDAgTCAyNCAwIEMgMjguNDE4IDAgMzIgMy41ODIgMzIgOCBMIDMyIDI0IEMgMzIgMjguNDE4IDI4LjQxOCAzMiAyNCAzMiBMIDggMzIgQyAzLjU4MiAzMiAwIDI4LjQxOCAwIDI0IEwgMCA4IFoiIGZpbGw9InJnYigxODMsMCwwKSIgZmlsbC1ydWxlPSJub256ZXJvIj48L3BhdGg+PHBhdGggZD0iTSA5IDcgTCAxNC41IDcgTCA5IDEuNSBMIDkgNyBaIE0gMiAwIEwgMTAgMCBMIDE2IDYgTCAxNiAxOCBDIDE2IDE4LjUzIDE1Ljc4OSAxOS4wMzkgMTUuNDE0IDE5LjQxNCBDIDE1LjAzOSAxOS43ODkgMTQuNTMgMjAgMTQgMjAgTCAyIDIwIEMgMS40NyAyMCAwLjk2MSAxOS43ODkgMC41ODYgMTkuNDE0IEMgMC4yMTEgMTkuMDM5IDAgMTguNTMgMCAxOCBMIDAgMiBDIDAgMS40NyAwLjIxMSAwLjk2MSAwLjU4NiAwLjU4NiBDIDAuOTYxIDAuMjExIDEuNDcgMCAyIDAgWiBNIDYuOTMgMTAuNDQgQyA3LjM0IDExLjM0IDcuODYgMTIuMDggOC40NiAxMi41OSBMIDguODcgMTIuOTEgQyA4IDEzLjA3IDYuOCAxMy4zNSA1LjUzIDEzLjg0IEwgNS40MiAxMy44OCBMIDUuOTIgMTIuODQgQyA2LjM3IDExLjk3IDYuNyAxMS4xOCA2LjkzIDEwLjQ0IFogTSAxMy40MSAxNC4yNSBDIDEzLjU5IDE0LjA3IDEzLjY4IDEzLjg0IDEzLjY5IDEzLjU5IEMgMTMuNzIgMTMuMzkgMTMuNjcgMTMuMiAxMy41NyAxMy4wNCBDIDEzLjI4IDEyLjU3IDEyLjUzIDEyLjM1IDExLjI5IDEyLjM1IEwgMTAgMTIuNDIgTCA5LjEzIDExLjg0IEMgOC41IDExLjMyIDcuOTMgMTAuNDEgNy41MyA5LjI4IEwgNy41NyA5LjE0IEMgNy45IDcuODEgOC4yMSA2LjIgNy41NSA1LjU0IEMgNy40NjkgNS40NjIgNy4zNzQgNS40IDcuMjY5IDUuMzU5IEMgNy4xNjQgNS4zMTggNy4wNTMgNS4yOTggNi45NCA1LjMgTCA2LjcgNS4zIEMgNi4zMyA1LjMgNiA1LjY5IDUuOTEgNi4wNyBDIDUuNTQgNy40IDUuNzYgOC4xMyA2LjEzIDkuMzQgTCA2LjEzIDkuMzUgQyA1Ljg4IDEwLjIzIDUuNTYgMTEuMjUgNS4wNSAxMi4yOCBMIDQuMDkgMTQuMDggTCAzLjIgMTQuNTcgQyAyIDE1LjMyIDEuNDMgMTYuMTYgMS4zMiAxNi42OSBDIDEuMjggMTYuODggMS4zIDE3LjA1IDEuMzcgMTcuMjMgTCAxLjQgMTcuMjggTCAxLjg4IDE3LjU5IEwgMi4zMiAxNy43IEMgMy4xMyAxNy43IDQuMDUgMTYuNzUgNS4yOSAxNC42MyBMIDUuNDcgMTQuNTYgQyA2LjUgMTQuMjMgNy43OCAxNCA5LjUgMTMuODEgQyAxMC41MyAxNC4zMiAxMS43NCAxNC41NSAxMi41IDE0LjU1IEMgMTIuOTQgMTQuNTUgMTMuMjQgMTQuNDQgMTMuNDEgMTQuMjUgWiBNIDEzIDEzLjU0IEwgMTMuMDkgMTMuNjUgQyAxMy4wOCAxMy43NSAxMy4wNSAxMy43NiAxMyAxMy43OCBMIDEyLjk2IDEzLjc4IEwgMTIuNzcgMTMuOCBDIDEyLjMxIDEzLjggMTEuNiAxMy42MSAxMC44NyAxMy4yOSBDIDEwLjk2IDEzLjE5IDExIDEzLjE5IDExLjEgMTMuMTkgQyAxMi41IDEzLjE5IDEyLjkgMTMuNDQgMTMgMTMuNTQgWiBNIDMuODMgMTUgQyAzLjE4IDE2LjE5IDIuNTkgMTYuODUgMi4xNCAxNyBDIDIuMTkgMTYuNjIgMi42NCAxNS45NiAzLjM1IDE1LjMxIEwgMy44MyAxNSBaIE0gNi44NSA4LjA5IEMgNi42MiA3LjE5IDYuNjEgNi40NiA2Ljc4IDYuMDQgTCA2Ljg1IDUuOTIgTCA3IDUuOTcgQyA3LjE3IDYuMjEgNy4xOSA2LjUzIDcuMDkgNy4wNyBMIDcuMDYgNy4yMyBMIDYuOSA4LjA1IEwgNi44NSA4LjA5IFoiIGZpbGw9InJnYigyNTUsMjU1LDI1NSkiIGZpbGwtcnVsZT0ibm9uemVybyIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMSA0IDQpIG1hdHJpeCgxIDAgMCAxIDQgMikiPjwvcGF0aD48L3N2Zz4=" width="32" height="32" alt=""></div>
+        <div class="flow-topbar__item" title="Other links"><span class="flow-topbar__label">Other links</span><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDcuMTM0IDEuNSBDIDcuNTE5IDAuODMzIDguNDgxIDAuODMzIDguODY2IDEuNSBMIDE0LjA2MiAxMC41IEMgMTQuNDQ3IDExLjE2NyAxMy45NjYgMTIgMTMuMTk2IDEyIEwgMi44MDQgMTIgQyAyLjAzNCAxMiAxLjU1MyAxMS4xNjcgMS45MzggMTAuNSBMIDcuMTM0IDEuNSBaIiBmaWxsPSIjMjYzMTQ0IiBmaWxsLXJ1bGU9Im5vbnplcm8iIHRyYW5zZm9ybT0ibWF0cml4KC0xIDAgMCAtMSAyMCAyMCkiPjwvcGF0aD48L3N2Zz4=" width="32" height="32" alt=""></div>
+      </div>
+    </div>
+
     <!-- Page header band. Title + caption on the left, the service's
          Control_Group on the right. -->
     <header class="bc-page-header" style="padding: 16px 0 16px; border-bottom: 1px solid var(--color-border-default); margin-bottom: 32px">
       <div class="mm-container flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center" style="gap: 12px">
-          <button type="button" class="flow-menu" data-flow-rail="open" aria-label="menu"></button>
           <div>
             <h1 style="margin: 0; font: 700 28px/1.4 var(--mm-font-title); color: var(--color-text-default)">Brief Curator</h1>
             <p class="mx-page-title-caption" style="margin: 0; color: var(--color-text-secondary-cool)">AI content creation guide for influencer campaigns</p>
@@ -4355,10 +4367,7 @@ button { font-family: inherit; }
             </div>
             <div class="bc-form-grid">
               <div class="bc-field">
-                <div class="bc-label-row">
-                  <label class="bc-label" for="bc-f-campaign"><svg class="ic" aria-hidden="true"><use href="#p-Megaphone-regular"/></svg>Campaign</label>
-                  <button type="button" class="bc-link" data-action="open-create" style="display: inline-flex; align-items: center; gap: 4px"><svg class="ic" width="12" height="12" aria-hidden="true"><use href="#p-Plus-bold"/></svg>Create new campaign</button>
-                </div>
+                <label class="bc-label" for="bc-f-campaign"><svg class="ic" aria-hidden="true"><use href="#p-Megaphone-regular"/></svg>Campaign</label>
                 <select id="bc-f-campaign" class="bc-select" data-field="campaign"></select>
               </div>
               <div class="bc-field">
@@ -6674,23 +6683,6 @@ button { font-family: inherit; }
       </form>
     </dialog>
 
-    <!-- CampaignCreateModal — a new campaign is created and picked at once. -->
-    <dialog class="bc-dialog" data-dialog="create" aria-labelledby="bc-create-title">
-      <form method="dialog" novalidate>
-        <h2 class="bc-dialog-title" id="bc-create-title">Create New Campaign</h2>
-        <p class="bc-dialog-body">Create a new campaign and use it right away.</p>
-        <div class="bc-field">
-          <label class="bc-label" for="bc-create-name">Campaign</label>
-          <input id="bc-create-name" class="bc-input" type="text" name="name" placeholder="e.g. 2H UNPK" autocomplete="off">
-          <p class="bc-error" data-error="name" hidden>Campaign name is required.</p>
-        </div>
-        <div class="bc-dialog-actions">
-          <button type="submit" value="cancel" class="bc-btn bc-btn-quiet" formnovalidate>Cancel</button>
-          <button type="submit" value="create" class="bc-btn bc-btn-primary">Create</button>
-        </div>
-      </form>
-    </dialog>
-
     <!-- ═══ Mockup toolbar — presentation control, not part of the product.
          Top row: what the scenario shows, the scenario switch, Restart, Hide.
          Bottom row: every view, one button each. Guide and Monitor carry the
@@ -7198,7 +7190,6 @@ button { font-family: inherit; }
         if (k === 'campaign') {
           var id = f.value, keep = state.form;
           state.form = id ? freshForm(id) : keep;
-          if (id && !CAMPAIGNS.some(function (c) { return c.id === id; })) state.form = { campaign: id, start: '', end: '', products: [], hashtags: '', basics: '', direction: '' };
           if (!id) state.form.campaign = '';
           renderForm(true);
           return;
@@ -7621,18 +7612,6 @@ button { font-family: inherit; }
     setTimeout(function () { renderTable(); renderSelection(); }, 0);
   });
 
-  $('[data-dialog="create"] form').addEventListener('submit', function (e) {
-    var submitter = e.submitter;
-    if (!submitter || submitter.value !== 'create') return;
-    var name = e.target.name.value.trim(), err = $('[data-error="name"]', e.target);
-    err.hidden = !!name; e.target.name.classList.toggle('is-invalid', !name);
-    if (!name) { e.preventDefault(); return; }
-    var id = 'custom-' + Date.now();
-    state.campaigns.push({ id: id, name: name, start: '', end: '', products: [], hashtags: '', basics: '', direction: '' });
-    state.form = { campaign: id, start: '', end: '', products: [], hashtags: '', basics: '', direction: '' };
-    setTimeout(function () { renderForm(true); }, 0);
-  });
-
   /* ── Actions ── */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-action], [data-goto], [data-step], .bc-tb [data-nav], [data-page]');
@@ -7663,11 +7642,6 @@ button { font-family: inherit; }
         renderTable(); renderSelection(); return;
       }
       case 'open-add': return addInfluencer();
-      case 'open-create': {
-        var d = $('[data-dialog="create"]'); $('form', d).reset();
-        $('[data-error="name"]', d).hidden = true; $('.bc-input', d).classList.remove('is-invalid');
-        return openDialog('create');
-      }
       case 'back': return go('campaign', { flow: true });
       case 'generate': return handleGenerate();
       case 'edit-selection':
@@ -7719,10 +7693,17 @@ button { font-family: inherit; }
   function measure() {
     var header = $('.bc-page-header');
     root.style.setProperty('--bc-header-h', header.getBoundingClientRect().height + 'px');
+    measureHeaderBottom();
     var tb = bind('toolbar');
     if (!tb.classList.contains('is-hidden')) root.style.setProperty('--bc-toolbar-h', tb.offsetHeight + 'px');
   }
   window.addEventListener('resize', measure);
+  // The top bar scrolls away above the sticky header, so the header's bottom
+  // edge moves; overlays that start under the header follow it.
+  function measureHeaderBottom() {
+    root.style.setProperty('--bc-header-bottom', Math.max(0, $('.bc-page-header').getBoundingClientRect().bottom) + 'px');
+  }
+  window.addEventListener('scroll', measureHeaderBottom, { passive: true });
 
 
   /* ═══ 5 Monitor · 6 Monitoring detail ═══
