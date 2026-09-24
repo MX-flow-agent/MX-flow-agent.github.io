@@ -23,11 +23,15 @@
              verbatim below, so every colour, radius and type size resolves
              through the real MX MAP tokens.
 
+     Landing: the AIM rail (LNB) opens the Monitor (#monitor); every other
+             way in (Influencer Recruiter's hand-off, a bare URL) opens a
+             blank Campaign Info (#campaign).
+
      Differences from the running app, on purpose:
-       · AIM rail (Sidebar) is the shared one, shared/flow-rail.js, opened
-         from the ☰ beside the title — the same rail Influencer Recruiter draws
-       · no host utility bar — MxPageShell only draws it for a page that
-         passes its own `nav`, which Brief Curator does not
+       · top bar is Performance Analyst's (shared/flow-topbar.css), so all
+         three agents share one bar; its ☰ opens the AIM rail
+       · AIM rail (Sidebar) is the shared one, shared/flow-rail.js — the same
+         rail Influencer Recruiter draws
        · content is representative, not a real generation; the roster,
          campaigns and the two extra guides are synthetic
        · generation runs in ~5 s instead of ~1 min
@@ -3702,6 +3706,11 @@ button { font-family: inherit; }
 .bc-page-header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; background: var(--bc-page); }
 .bc-steps { display: flex; align-items: center; gap: 8px; }
 .bc-step { display: flex; align-items: center; gap: 8px; }
+.bc-step-btn { display: flex; align-items: center; gap: 8px; margin: -4px -6px; padding: 4px 6px; border: 0; border-radius: var(--mm-radius-md); background: transparent; color: inherit; font: inherit; cursor: pointer; transition: background 120ms; }
+.bc-step-btn:hover:not(:disabled) { background: var(--bc-sunken); }
+.bc-step-btn:focus-visible { outline: 2px solid var(--bc-blue); outline-offset: 2px; }
+.bc-step-btn:disabled { cursor: default; }
+.bc-step-btn:disabled .bc-step-label { opacity: .6; }
 .bc-step-link { width: 32px; height: 1px; background: var(--bc-line); transition: background 200ms var(--bc-ease); }
 .bc-step-link.is-on { background: var(--bc-blue); }
 .bc-step-dot { width: 24px; height: 24px; border-radius: var(--mm-radius-pill); display: flex; align-items: center; justify-content: center; font: 700 12px/1 var(--mm-font-body); background: var(--bc-sunken); color: var(--bc-ink-2); transition: background 200ms var(--bc-ease), color 200ms var(--bc-ease); }
@@ -3744,7 +3753,6 @@ button { font-family: inherit; }
 .bc-field { display: grid; gap: 6px; min-width: 0; }
 .bc-label { display: flex; align-items: center; gap: 8px; font: 500 14px/1.4 var(--mm-font-body); color: var(--bc-ink); }
 .bc-label .ic { width: 16px; height: 16px; color: var(--bc-ink-2); }
-.bc-label-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .bc-hint { font: 400 12px/1.4 var(--mm-font-body); color: var(--bc-ink-2); }
 .bc-input, .bc-select, .bc-textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--bc-line); border-radius: var(--mm-radius-lg); background: var(--bc-surface); color: var(--bc-ink); font: 400 14px/1.4 var(--mm-font-body); transition: border-color 120ms; }
 .bc-input, .bc-select { height: 40px; padding: 0 12px; }
@@ -3809,12 +3817,7 @@ button { font-family: inherit; }
 .bc-source[data-state="editing"] { background: var(--bc-tint); color: var(--bc-blue-ink); }
 .bc-source[data-state="editing"] .ic { color: var(--bc-blue-ink); }
 .bc-input, .bc-select, .bc-textarea, .bc-date { transition: background-color 160ms var(--bc-ease), border-color 160ms var(--bc-ease); }
-.bc-form.is-locked :is(.bc-input, .bc-select, .bc-textarea, .bc-date) { border-color: transparent; background-color: var(--bc-sunken); color: var(--bc-ink); -webkit-text-fill-color: var(--bc-ink); opacity: 1; cursor: default; }
-.bc-form.is-locked .bc-select { background-image: none; }
-.bc-form.is-locked .bc-textarea { resize: none; }
-.bc-form.is-locked .bc-date .ic { visibility: hidden; }
-.bc-form.is-locked .bc-toggle { cursor: default; }
-.bc-form.is-locked .bc-toggle:not([aria-pressed="true"]) { display: none; }
+.bc-select.is-invalid { border-color: var(--color-text-danger); }
 .bc-table-wrap.is-review .bc-check { visibility: hidden; }
 .bc-table-wrap.is-review .bc-row { cursor: default; }
 .bc-table-wrap.is-review .bc-row, .bc-table-wrap.is-review .bc-row:hover { background: transparent; }
@@ -3855,7 +3858,7 @@ button { font-family: inherit; }
 .bc-form-error { margin: 0; padding: 10px 14px; border-radius: var(--mm-radius-lg); background: var(--color-surface-danger-subtle); color: var(--color-text-danger); font: 400 14px/1.4 var(--mm-font-body); }
 
 /* Generating overlay — the work area below the sticky header. */
-.bc-gen { position: fixed; left: 0; right: 0; bottom: 0; top: var(--bc-header-h, 96px); z-index: 30; display: flex; align-items: center; justify-content: center; padding: 24px 24px calc(var(--bc-toolbar-h) + 24px); background: rgba(251, 251, 251, 0.96); }
+.bc-gen { position: fixed; left: 0; right: 0; bottom: 0; top: var(--bc-header-bottom, var(--bc-header-h, 96px)); z-index: 30; display: flex; align-items: center; justify-content: center; padding: 24px 24px calc(var(--bc-toolbar-h) + 24px); background: rgba(251, 251, 251, 0.96); }
 .bc-gen[hidden] { display: none; }
 .bc-gen.is-entering { animation: bc-fade 300ms var(--bc-ease) both; }
 @keyframes bc-fade { from { opacity: 0; } }
@@ -4141,6 +4144,7 @@ button { font-family: inherit; }
 @media (prefers-reduced-motion: reduce) { .bc-brief-badge { transition: none; } }
 </style>
 <link rel="stylesheet" href="shared/flow-toolbar.css">
+<link rel="stylesheet" href="shared/flow-topbar.css">
 <script src="shared/flow-rail.js" data-current="brief" data-push=".mxmap-tokens" defer></script>
 </head>
 <body>
@@ -4231,12 +4235,24 @@ button { font-family: inherit; }
 <div class="mxmap-tokens flex min-h-screen" style="background: var(--color-background-default)">
   <div class="flex min-w-0 flex-1 flex-col">
 
+    <!-- Top bar: the same bar as Performance Analyst's (menu, then the host's
+         utility items). Styles: shared/flow-topbar.css. Keep in step with
+         Brief_Curator.html / Influencer_Recruiter.html. -->
+    <div class="flow-topbar">
+      <button type="button" class="flow-topbar__menu" data-flow-rail="open" aria-expanded="false" aria-label="Menu"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDAgLTEgQyAtMC41NTIgLTEgLTEgLTAuNTUyIC0xIDAgQyAtMSAwLjU1MiAtMC41NTIgMSAwIDEgTCAwIDAgTCAwIC0xIFogTSAxNiAxIEMgMTYuNTUyIDEgMTcgMC41NTIgMTcgMCBDIDE3IC0wLjU1MiAxNi41NTIgLTEgMTYgLTEgTCAxNiAwIEwgMTYgMSBaIE0gMCAwIEwgMCAxIEwgMTYgMSBMIDE2IDAgTCAxNiAtMSBMIDAgLTEgTCAwIDAgWiIgZmlsbD0iIzI2MzE0NCIgZmlsbC1ydWxlPSJub256ZXJvIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDQuMjY4IDYpIj48L3BhdGg+PHBhdGggZD0iTSAwIC0xIEMgLTAuNTUyIC0xIC0xIC0wLjU1MiAtMSAwIEMgLTEgMC41NTIgLTAuNTUyIDEgMCAxIEwgMCAwIEwgMCAtMSBaIE0gMTYgMSBDIDE2LjU1MiAxIDE3IDAuNTUyIDE3IDAgQyAxNyAtMC41NTIgMTYuNTUyIC0xIDE2IC0xIEwgMTYgMCBMIDE2IDEgWiBNIDAgMCBMIDAgMSBMIDE2IDEgTCAxNiAwIEwgMTYgLTEgTCAwIC0xIEwgMCAwIFoiIGZpbGw9IiMyNjMxNDQiIGZpbGwtcnVsZT0ibm9uemVybyIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMSA0LjI2OCAxMikiPjwvcGF0aD48cGF0aCBkPSJNIDAgLTEgQyAtMC41NTIgLTEgLTEgLTAuNTUyIC0xIDAgQyAtMSAwLjU1MiAtMC41NTIgMSAwIDEgTCAwIDAgTCAwIC0xIFogTSAxNiAxIEMgMTYuNTUyIDEgMTcgMC41NTIgMTcgMCBDIDE3IC0wLjU1MiAxNi41NTIgLTEgMTYgLTEgTCAxNiAwIEwgMTYgMSBaIE0gMCAwIEwgMCAxIEwgMTYgMSBMIDE2IDAgTCAxNiAtMSBMIDAgLTEgTCAwIDAgWiIgZmlsbD0iIzI2MzE0NCIgZmlsbC1ydWxlPSJub256ZXJvIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDQuMjY4IDE4KSI+PC9wYXRoPjwvc3ZnPg==" width="32" height="32" alt=""></button>
+      <div class="flow-topbar__items">
+        <div class="flow-topbar__item" title="admin (ALL)"><span class="flow-topbar__label">admin (ALL)</span><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIj48cmVjdCB4PSI2LjUiIHk9IjQiIHdpZHRoPSI2IiBoZWlnaHQ9IjYiIHJ4PSIzIiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiI+PC9yZWN0PjxwYXRoIGQ9Ik04LjUgMTNDNi4yNzc3NyAxMyA0LjUgMTUgNC41IDE3IiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj48L3BhdGg+PGNpcmNsZSBjeD0iMTUuNSIgY3k9IjE1IiByPSIzIiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiI+PC9jaXJjbGU+PHBhdGggZD0iTTE1LjUgMTEuNVYxME0xMiAxNUgxMC41TTE1LjUgMTguNVYyME0xOSAxNUgyMC41IiBzdHJva2U9IiMyNjMxNDQiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48L3BhdGg+PHBhdGggZD0iTTE3Ljk3NDkgMTIuNTI1MUwxOS4wMzU1IDExLjQ2NDVNMTMuMDI1MSAxMi41MjUxTDExLjk2NDUgMTEuNDY0NU0xMy4wMjUxIDE3LjQ3NDlMMTEuOTY0NSAxOC41MzU2TTE3Ljk3NDkgMTcuNDc0OUwxOS4wMzU1IDE4LjUzNTYiIHN0cm9rZT0iIzI2MzE0NCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvcGF0aD48L3N2Zz4=" width="24" height="24" alt=""></div>
+        <div class="flow-topbar__item"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDQgOCBMIDQgMTEgQyA0IDExLjE1NiAzLjk2NCAxMS4zMDkgMy44OTQgMTEuNDQ4IEwgMi42MiAxNCBMIDE3LjM4NCAxNCBMIDE2LjEwOCAxMS40NDggQyAxNi4wMzggMTEuMzA5IDE2LjAwMSAxMS4xNTYgMTYgMTEgTCAxNiA4IEMgMTYgNi40MDkgMTUuMzY4IDQuODgzIDE0LjI0MyAzLjc1NyBDIDEzLjExNyAyLjYzMiAxMS41OTEgMiAxMCAyIEMgOC40MDkgMiA2Ljg4MyAyLjYzMiA1Ljc1NyAzLjc1NyBDIDQuNjMyIDQuODgzIDQgNi40MDkgNCA4IFogTSA2IDE2IEwgMSAxNiBDIDAuODI5IDE2IDAuNjYyIDE1Ljk1NiAwLjUxMyAxNS44NzMgQyAwLjM2NCAxNS43OSAwLjIzOSAxNS42NyAwLjE0OSAxNS41MjUgQyAwLjA2IDE1LjM4IDAuMDA5IDE1LjIxNSAwLjAwMSAxNS4wNDQgQyAtMC4wMDcgMTQuODc0IDAuMDMgMTQuNzA0IDAuMTA2IDE0LjU1MiBMIDIgMTAuNzY0IEwgMiA4IEMgMiA1Ljg3OCAyLjg0MyAzLjg0MyA0LjM0MyAyLjM0MyBDIDUuODQzIDAuODQzIDcuODc4IDAgMTAgMCBDIDEyLjEyMiAwIDE0LjE1NyAwLjg0MyAxNS42NTcgMi4zNDMgQyAxNy4xNTcgMy44NDMgMTggNS44NzggMTggOCBMIDE4IDEwLjc2NCBMIDE5Ljg5NCAxNC41NTIgQyAxOS45NyAxNC43MDQgMjAuMDA3IDE0Ljg3NCAxOS45OTkgMTUuMDQ0IEMgMTkuOTkxIDE1LjIxNSAxOS45NCAxNS4zOCAxOS44NTEgMTUuNTI1IEMgMTkuNzYxIDE1LjY3IDE5LjYzNiAxNS43OSAxOS40ODcgMTUuODczIEMgMTkuMzM4IDE1Ljk1NiAxOS4xNyAxNiAxOSAxNiBMIDE0IDE2IEMgMTQgMTcuMDYxIDEzLjU3OSAxOC4wNzggMTIuODI4IDE4LjgyOCBDIDEyLjA3OCAxOS41NzkgMTEuMDYxIDIwIDEwIDIwIEMgOC45MzkgMjAgNy45MjIgMTkuNTc5IDcuMTcyIDE4LjgyOCBDIDYuNDIxIDE4LjA3OCA2IDE3LjA2MSA2IDE2IFogTSAxMiAxNiBMIDggMTYgQyA4IDE2LjUzIDguMjExIDE3LjAzOSA4LjU4NiAxNy40MTQgQyA4Ljk2MSAxNy43ODkgOS40NyAxOCAxMCAxOCBDIDEwLjUzIDE4IDExLjAzOSAxNy43ODkgMTEuNDE0IDE3LjQxNCBDIDExLjc4OSAxNy4wMzkgMTIgMTYuNTMgMTIgMTYgWiIgZmlsbD0iIzI2MzE0NCIgZmlsbC1ydWxlPSJub256ZXJvIiB0cmFuc2Zvcm09Im1hdHJpeCgxIDAgMCAxIDIgMikiPjwvcGF0aD48L3N2Zz4=" width="32" height="32" alt=""></div>
+        <div class="flow-topbar__item" title="User Manual"><span class="flow-topbar__label">User Manual</span><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDAgOCBDIDAgMy41ODIgMy41ODIgMCA4IDAgTCAyNCAwIEMgMjguNDE4IDAgMzIgMy41ODIgMzIgOCBMIDMyIDI0IEMgMzIgMjguNDE4IDI4LjQxOCAzMiAyNCAzMiBMIDggMzIgQyAzLjU4MiAzMiAwIDI4LjQxOCAwIDI0IEwgMCA4IFoiIGZpbGw9InJnYigxODMsMCwwKSIgZmlsbC1ydWxlPSJub256ZXJvIj48L3BhdGg+PHBhdGggZD0iTSA5IDcgTCAxNC41IDcgTCA5IDEuNSBMIDkgNyBaIE0gMiAwIEwgMTAgMCBMIDE2IDYgTCAxNiAxOCBDIDE2IDE4LjUzIDE1Ljc4OSAxOS4wMzkgMTUuNDE0IDE5LjQxNCBDIDE1LjAzOSAxOS43ODkgMTQuNTMgMjAgMTQgMjAgTCAyIDIwIEMgMS40NyAyMCAwLjk2MSAxOS43ODkgMC41ODYgMTkuNDE0IEMgMC4yMTEgMTkuMDM5IDAgMTguNTMgMCAxOCBMIDAgMiBDIDAgMS40NyAwLjIxMSAwLjk2MSAwLjU4NiAwLjU4NiBDIDAuOTYxIDAuMjExIDEuNDcgMCAyIDAgWiBNIDYuOTMgMTAuNDQgQyA3LjM0IDExLjM0IDcuODYgMTIuMDggOC40NiAxMi41OSBMIDguODcgMTIuOTEgQyA4IDEzLjA3IDYuOCAxMy4zNSA1LjUzIDEzLjg0IEwgNS40MiAxMy44OCBMIDUuOTIgMTIuODQgQyA2LjM3IDExLjk3IDYuNyAxMS4xOCA2LjkzIDEwLjQ0IFogTSAxMy40MSAxNC4yNSBDIDEzLjU5IDE0LjA3IDEzLjY4IDEzLjg0IDEzLjY5IDEzLjU5IEMgMTMuNzIgMTMuMzkgMTMuNjcgMTMuMiAxMy41NyAxMy4wNCBDIDEzLjI4IDEyLjU3IDEyLjUzIDEyLjM1IDExLjI5IDEyLjM1IEwgMTAgMTIuNDIgTCA5LjEzIDExLjg0IEMgOC41IDExLjMyIDcuOTMgMTAuNDEgNy41MyA5LjI4IEwgNy41NyA5LjE0IEMgNy45IDcuODEgOC4yMSA2LjIgNy41NSA1LjU0IEMgNy40NjkgNS40NjIgNy4zNzQgNS40IDcuMjY5IDUuMzU5IEMgNy4xNjQgNS4zMTggNy4wNTMgNS4yOTggNi45NCA1LjMgTCA2LjcgNS4zIEMgNi4zMyA1LjMgNiA1LjY5IDUuOTEgNi4wNyBDIDUuNTQgNy40IDUuNzYgOC4xMyA2LjEzIDkuMzQgTCA2LjEzIDkuMzUgQyA1Ljg4IDEwLjIzIDUuNTYgMTEuMjUgNS4wNSAxMi4yOCBMIDQuMDkgMTQuMDggTCAzLjIgMTQuNTcgQyAyIDE1LjMyIDEuNDMgMTYuMTYgMS4zMiAxNi42OSBDIDEuMjggMTYuODggMS4zIDE3LjA1IDEuMzcgMTcuMjMgTCAxLjQgMTcuMjggTCAxLjg4IDE3LjU5IEwgMi4zMiAxNy43IEMgMy4xMyAxNy43IDQuMDUgMTYuNzUgNS4yOSAxNC42MyBMIDUuNDcgMTQuNTYgQyA2LjUgMTQuMjMgNy43OCAxNCA5LjUgMTMuODEgQyAxMC41MyAxNC4zMiAxMS43NCAxNC41NSAxMi41IDE0LjU1IEMgMTIuOTQgMTQuNTUgMTMuMjQgMTQuNDQgMTMuNDEgMTQuMjUgWiBNIDEzIDEzLjU0IEwgMTMuMDkgMTMuNjUgQyAxMy4wOCAxMy43NSAxMy4wNSAxMy43NiAxMyAxMy43OCBMIDEyLjk2IDEzLjc4IEwgMTIuNzcgMTMuOCBDIDEyLjMxIDEzLjggMTEuNiAxMy42MSAxMC44NyAxMy4yOSBDIDEwLjk2IDEzLjE5IDExIDEzLjE5IDExLjEgMTMuMTkgQyAxMi41IDEzLjE5IDEyLjkgMTMuNDQgMTMgMTMuNTQgWiBNIDMuODMgMTUgQyAzLjE4IDE2LjE5IDIuNTkgMTYuODUgMi4xNCAxNyBDIDIuMTkgMTYuNjIgMi42NCAxNS45NiAzLjM1IDE1LjMxIEwgMy44MyAxNSBaIE0gNi44NSA4LjA5IEMgNi42MiA3LjE5IDYuNjEgNi40NiA2Ljc4IDYuMDQgTCA2Ljg1IDUuOTIgTCA3IDUuOTcgQyA3LjE3IDYuMjEgNy4xOSA2LjUzIDcuMDkgNy4wNyBMIDcuMDYgNy4yMyBMIDYuOSA4LjA1IEwgNi44NSA4LjA5IFoiIGZpbGw9InJnYigyNTUsMjU1LDI1NSkiIGZpbGwtcnVsZT0ibm9uemVybyIgdHJhbnNmb3JtPSJtYXRyaXgoMSAwIDAgMSA0IDQpIG1hdHJpeCgxIDAgMCAxIDQgMikiPjwvcGF0aD48L3N2Zz4=" width="32" height="32" alt=""></div>
+        <div class="flow-topbar__item" title="Other links"><span class="flow-topbar__label">Other links</span><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSIjMjYzMTQ0Ij48cGF0aCBkPSJNIDcuMTM0IDEuNSBDIDcuNTE5IDAuODMzIDguNDgxIDAuODMzIDguODY2IDEuNSBMIDE0LjA2MiAxMC41IEMgMTQuNDQ3IDExLjE2NyAxMy45NjYgMTIgMTMuMTk2IDEyIEwgMi44MDQgMTIgQyAyLjAzNCAxMiAxLjU1MyAxMS4xNjcgMS45MzggMTAuNSBMIDcuMTM0IDEuNSBaIiBmaWxsPSIjMjYzMTQ0IiBmaWxsLXJ1bGU9Im5vbnplcm8iIHRyYW5zZm9ybT0ibWF0cml4KC0xIDAgMCAtMSAyMCAyMCkiPjwvcGF0aD48L3N2Zz4=" width="32" height="32" alt=""></div>
+      </div>
+    </div>
+
     <!-- Page header band. Title + caption on the left, the service's
          Control_Group on the right. -->
     <header class="bc-page-header" style="padding: 16px 0 16px; border-bottom: 1px solid var(--color-border-default); margin-bottom: 32px">
       <div class="mm-container flex flex-wrap items-center justify-between gap-4">
         <div class="flex items-center" style="gap: 12px">
-          <button type="button" class="flow-menu" data-flow-rail="open" aria-label="menu"></button>
           <div>
             <h1 style="margin: 0; font: 700 28px/1.4 var(--mm-font-title); color: var(--color-text-default)">Brief Curator</h1>
             <p class="mx-page-title-caption" style="margin: 0; color: var(--color-text-secondary-cool)">AI content creation guide for influencer campaigns</p>
@@ -4244,15 +4260,16 @@ button { font-family: inherit; }
         </div>
 
         <!-- TGAgentHeader — step tracker, then Reset on the first two steps.
+             Each step is a button: 1 and 2 always, 3 once this run has a guide.
              On the guide: one avatar per brief (a check once confirmed), the
              count, and Send, which unlocks when every brief is confirmed.
              The Monitor swaps all of it for New brief cluster. -->
         <div class="flex flex-wrap items-center justify-end" style="gap: 16px">
           <div class="bc-header-actions flex items-center" style="gap: 24px">
             <ol class="bc-steps" aria-label="Steps" style="margin: 0; padding: 0; list-style: none">
-              <li class="bc-step"><span class="bc-step-dot">1</span><span class="bc-step-label">Campaign Info</span></li>
-              <li class="bc-step"><span class="bc-step-link" aria-hidden="true"></span><span class="bc-step-dot">2</span><span class="bc-step-label">Select Influencers</span></li>
-              <li class="bc-step"><span class="bc-step-link" aria-hidden="true"></span><span class="bc-step-dot">3</span><span class="bc-step-label">Content Guide</span></li>
+              <li class="bc-step"><button type="button" class="bc-step-btn" data-step="campaign"><span class="bc-step-dot">1</span><span class="bc-step-label">Campaign Info</span></button></li>
+              <li class="bc-step"><span class="bc-step-link" aria-hidden="true"></span><button type="button" class="bc-step-btn" data-step="select"><span class="bc-step-dot">2</span><span class="bc-step-label">Select Influencers</span></button></li>
+              <li class="bc-step"><span class="bc-step-link" aria-hidden="true"></span><button type="button" class="bc-step-btn" data-step="guide"><span class="bc-step-dot">3</span><span class="bc-step-label">Content Guide</span></button></li>
             </ol>
             <button type="button" class="bc-reset" data-action="reset"><svg class="ic" width="16" height="16" aria-hidden="true"><use href="#mx-IconReset"/></svg>Reset</button>
             <div class="bc-sendbar" data-bind="sendbar" hidden>
@@ -4339,24 +4356,18 @@ button { font-family: inherit; }
       </section>
 
       <!-- ═══ Step 1 · CampaignForm ═══
-           Arrives set up by the upstream agent that plans the campaign, so it
-           opens locked for review: values on a sunken ground, only the chosen
-           products. Edit Campaign unlocks the fields (Done editing locks them
-           again) and the tag flips from "Prefilled by agent" to "Edited".
-           Review Influencers moves on. No required-field check, as in stg. -->
+           Always opens blank and editable. Picking a campaign preset from the
+           dropdown fills every field. Review Influencers moves on once a
+           campaign is picked (NEXT-GEN: stg has no required-field check). -->
       <section class="bc-screen" data-screen="campaign" aria-labelledby="bc-campaign-title" hidden>
         <div class="bc-stack">
           <div class="bc-card bc-form">
             <div class="bc-form-head">
               <h2 class="bc-title" id="bc-campaign-title">Campaign Info</h2>
-              <span class="bc-source" data-bind="campSource"></span>
             </div>
             <div class="bc-form-grid">
               <div class="bc-field">
-                <div class="bc-label-row">
-                  <label class="bc-label" for="bc-f-campaign"><svg class="ic" aria-hidden="true"><use href="#p-Megaphone-regular"/></svg>Campaign</label>
-                  <button type="button" class="bc-link" data-action="open-create" data-bind="createCampaign" style="display: inline-flex; align-items: center; gap: 4px"><svg class="ic" width="12" height="12" aria-hidden="true"><use href="#p-Plus-bold"/></svg>Create new campaign</button>
-                </div>
+                <label class="bc-label" for="bc-f-campaign"><svg class="ic" aria-hidden="true"><use href="#p-Megaphone-regular"/></svg>Campaign</label>
                 <select id="bc-f-campaign" class="bc-select" data-field="campaign"></select>
               </div>
               <div class="bc-field">
@@ -4393,7 +4404,6 @@ button { font-family: inherit; }
           <div class="bc-actions">
             <button type="button" class="bc-btn bc-btn-quiet" data-action="to-monitor"><svg class="ic" aria-hidden="true"><use href="#p-ArrowLeft-regular"/></svg>Back to Monitor</button>
             <div class="bc-actions-end">
-              <button type="button" class="bc-btn bc-btn-secondary" data-action="edit-campaign" data-bind="editCampaign" aria-pressed="false"><svg class="ic" aria-hidden="true"><use href="#p-PencilSimple-regular"/></svg><span>Edit Campaign</span></button>
               <button type="button" class="bc-btn bc-btn-primary" data-action="next-select">Review Influencers<svg class="ic" aria-hidden="true"><use href="#p-ArrowRight-bold"/></svg></button>
             </div>
           </div>
@@ -4474,7 +4484,7 @@ button { font-family: inherit; }
               <div class="eg-overview-card">
                 <div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-CalendarBlank-bold"/></svg></div>
                 <div class="eg-overview-label">Posting Period</div>
-                <div class="eg-overview-value" data-camp="period">2026.10.05 – 2026.10.31</div>
+                <div class="eg-overview-value" data-camp="period">2027.01.14 – 2027.01.31</div>
               </div>
               <div class="eg-overview-card">
                 <div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-Cube-bold"/></svg></div>
@@ -5161,7 +5171,7 @@ button { font-family: inherit; }
               <p class="eg-campaign-desc" data-camp="desc">With AI-generated content flooding every feed, audiences no longer trust what they see. This campaign makes Galaxy’s camera the answer: creators capture a moment exactly as they lived it — no filters, no restaging — and let the camera do what editing used to.</p>
             </div>
             <div class="eg-overview-cards">
-              <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-CalendarBlank-bold"/></svg></div><div class="eg-overview-label">Posting Period</div><div class="eg-overview-value" data-camp="period">2026.10.05 – 2026.10.31</div></div>
+              <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-CalendarBlank-bold"/></svg></div><div class="eg-overview-label">Posting Period</div><div class="eg-overview-value" data-camp="period">2027.01.14 – 2027.01.31</div></div>
               <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-Cube-bold"/></svg></div><div class="eg-overview-label">Product/CXP</div><div class="eg-overview-value" data-camp="product">Galaxy S Series</div></div>
               <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-Tag-bold"/></svg></div><div class="eg-overview-label">Mandatory Hashtags</div><div class="eg-hashtag-chips" data-camp="hashtags">
   <span class="eg-hashtag-chip">#withGalaxy</span>
@@ -5545,7 +5555,7 @@ button { font-family: inherit; }
               <p class="eg-campaign-desc" data-camp="desc">With AI-generated content flooding every feed, audiences no longer trust what they see. This campaign makes Galaxy’s camera the answer: creators capture a moment exactly as they lived it — no filters, no restaging — and let the camera do what editing used to.</p>
             </div>
             <div class="eg-overview-cards">
-              <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-CalendarBlank-bold"/></svg></div><div class="eg-overview-label">Posting Period</div><div class="eg-overview-value" data-camp="period">2026.10.05 – 2026.10.31</div></div>
+              <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-CalendarBlank-bold"/></svg></div><div class="eg-overview-label">Posting Period</div><div class="eg-overview-value" data-camp="period">2027.01.14 – 2027.01.31</div></div>
               <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-Cube-bold"/></svg></div><div class="eg-overview-label">Product/CXP</div><div class="eg-overview-value" data-camp="product">Galaxy S Series</div></div>
               <div class="eg-overview-card"><div class="eg-overview-icon"><svg class="ic" width="13" height="13"><use href="#p-Tag-bold"/></svg></div><div class="eg-overview-label">Mandatory Hashtags</div><div class="eg-hashtag-chips" data-camp="hashtags">
   <span class="eg-hashtag-chip">#withGalaxy</span>
@@ -5941,7 +5951,7 @@ button { font-family: inherit; }
 <div class="eg-overview-card">
 <div class="eg-overview-icon"><svg class="ic" height="13" width="13"><use href="#p-CalendarBlank-bold"></use></svg></div>
 <div class="eg-overview-label">Posting Period</div>
-<div class="eg-overview-value" data-camp="period">2026.10.05 – 2026.10.31</div>
+<div class="eg-overview-value" data-camp="period">2027.01.14 – 2027.01.31</div>
 </div>
 <div class="eg-overview-card">
 <div class="eg-overview-icon"><svg class="ic" height="13" width="13"><use href="#p-Cube-bold"></use></svg></div>
@@ -6264,7 +6274,7 @@ button { font-family: inherit; }
 <div class="eg-overview-card">
 <div class="eg-overview-icon"><svg class="ic" height="13" width="13"><use href="#p-CalendarBlank-bold"></use></svg></div>
 <div class="eg-overview-label">Posting Period</div>
-<div class="eg-overview-value" data-camp="period">2026.10.05 – 2026.10.31</div>
+<div class="eg-overview-value" data-camp="period">2027.01.14 – 2027.01.31</div>
 </div>
 <div class="eg-overview-card">
 <div class="eg-overview-icon"><svg class="ic" height="13" width="13"><use href="#p-Cube-bold"></use></svg></div>
@@ -6553,7 +6563,7 @@ button { font-family: inherit; }
       <!-- ═══ 5 · Monitor (NEXT-GEN, imagined) ═══
            The loop's start and end: every brief cluster (one run of the flow)
            from draft to closed. New brief cluster starts Select Influencers;
-           sending a brief lands here. Shown as of 2026.10.12. -->
+           sending a brief lands here. Shown as of 2027.01.21. -->
       <section class="bc-screen" data-screen="monitor" aria-labelledby="mn-title" hidden>
         <div class="mn-banner" data-bind="mnBanner" role="status" hidden>
           <svg class="ic" aria-hidden="true"><use href="#p-CheckCircle-regular"/></svg>
@@ -6563,7 +6573,7 @@ button { font-family: inherit; }
         <div class="bc-head">
           <div class="bc-head-text">
             <h2 class="bc-title" id="mn-title">Monitor</h2>
-            <span class="bc-meta">Every brief cluster you have generated, from draft to closed. As of 2026.10.12.</span>
+            <span class="bc-meta">Every brief cluster you have generated, from draft to closed. As of 2027.01.21.</span>
           </div>
         </div>
         <div class="bc-card mn-kpis" data-bind="mnKpis"></div>
@@ -6673,23 +6683,6 @@ button { font-family: inherit; }
       </form>
     </dialog>
 
-    <!-- CampaignCreateModal — a new campaign is created and picked at once. -->
-    <dialog class="bc-dialog" data-dialog="create" aria-labelledby="bc-create-title">
-      <form method="dialog" novalidate>
-        <h2 class="bc-dialog-title" id="bc-create-title">Create New Campaign</h2>
-        <p class="bc-dialog-body">Create a new campaign and use it right away.</p>
-        <div class="bc-field">
-          <label class="bc-label" for="bc-create-name">Campaign</label>
-          <input id="bc-create-name" class="bc-input" type="text" name="name" placeholder="e.g. 2H UNPK" autocomplete="off">
-          <p class="bc-error" data-error="name" hidden>Campaign name is required.</p>
-        </div>
-        <div class="bc-dialog-actions">
-          <button type="submit" value="cancel" class="bc-btn bc-btn-quiet" formnovalidate>Cancel</button>
-          <button type="submit" value="create" class="bc-btn bc-btn-primary">Create</button>
-        </div>
-      </form>
-    </dialog>
-
     <!-- ═══ Mockup toolbar — presentation control, not part of the product.
          Top row: what the scenario shows, the scenario switch, Restart, Hide.
          Bottom row: every view, one button each. Guide and Monitor carry the
@@ -6704,10 +6697,7 @@ button { font-family: inherit; }
       </div>
       <div class="bc-tb-group bc-tb-views" role="group" aria-label="View">
         <button type="button" class="bc-tb-icon" data-nav="-1" aria-label="Previous view" title="Previous view (←)"><svg class="ic"><use href="#p-CaretLeft-bold"/></svg></button>
-        <span class="bc-tb-family">
-          <button type="button" data-goto="campaign" title="Campaign Info as the agent set it up (1)"><span class="bc-tb-num">1</span><span class="bc-tb-label">Campaign</span></button>
-          <button type="button" class="bc-tb-sub" data-goto="campaign-edit" title="Campaign Info unlocked for editing">Edit</button>
-        </span>
+        <button type="button" data-goto="campaign" title="Campaign Info, blank until a campaign is picked (1)"><span class="bc-tb-num">1</span><span class="bc-tb-label">Campaign</span></button>
         <span class="bc-tb-family">
           <button type="button" data-goto="select" title="The agent's suggested influencers (2)"><span class="bc-tb-num">2</span><span class="bc-tb-label">Select</span></button>
           <button type="button" class="bc-tb-sub" data-goto="select-edit" title="The full influencer list, open for picking">Edit</button>
@@ -6872,17 +6862,18 @@ button { font-family: inherit; }
     ['buds', 'Galaxy Buds'], ['book', 'Galaxy Book']
   ];
   var CAMPAIGNS = [
-    { id: 'cvt', name: 'Me, Unfiltered #withGalaxy', start: '2026-10-05', end: '2026-10-31', products: ['s-series'],
+    { id: 'cvt', name: 'Me, Unfiltered #withGalaxy', start: '2027-01-14', end: '2027-01-31', products: ['s-series'],
       hashtags: '#withGalaxy #GalaxyS27Ultra #TeamGalaxy #MeUnfiltered',
       basics: 'With AI-generated content flooding every feed, audiences no longer trust what they see. This campaign makes Galaxy’s camera the answer: creators capture a moment exactly as they lived it — no filters, no restaging — and let the camera do what editing used to.',
       direction: 'Keep the first take — no filters, no restaging. Let Galaxy Camera and Zoom carry the shot instead of post-editing, and show one on-screen camera UI moment as proof of capture. Natural light only.' }
   ];
   var FACTS = {
-    single: { headline: 'A human opening frame earns the view', body: 'For TikTok photo & film, a larger person share in the thumbnail raises views per reach (VTR) by ~1.3×.', segment: 'TikTok · Photography & Film' },
+    single: { headline: 'A human opening frame earns the view', body: 'For TikTok Photography & Film, a larger person share in the thumbnail raises views per reach (VTR) by ~1.3×.', segment: 'TikTok · Photography & Film' },
     batch: { headline: 'More people on screen beats solo', body: 'On TikTok, multiple people lift engagement (+8%), while solo appearances run a bit lower (−9%).', segment: 'TikTok' }
   };
-  // The upstream agent's setup for this run: its campaign and the influencer it
-  // suggested. Everything after step 2 follows the live selection, so editing the
+  // The upstream agent's setup for this run: the influencer it suggested, and
+  // the campaign the toolbar uses when it jumps past step 1 (step 1 itself
+  // always opens blank). Everything after step 2 follows the live selection, so editing the
   // list changes how many guides the run produces. bioFail / genFail stay empty;
   // they are the hooks a failure case would use.
   var SETUP = { selected: ['zina'], campaign: 'cvt', bioFail: [], genFail: [] };
@@ -6890,8 +6881,8 @@ button { font-family: inherit; }
   var SCREENS = ['campaign', 'select', 'generating', 'guide', 'monitor', 'detail'];
   // Toolbar views, in order: every screen, plus the states inside the guide
   // and the Monitor. Partial only exists when the run has several briefs.
-  var VIEWS = ['campaign', 'campaign-edit', 'select', 'select-edit', 'generating', 'guide', 'guide-partial', 'guide-confirmed', 'guide-send', 'monitor', 'monitor-sent', 'detail'];
-  var VIEW_SCREEN = { 'campaign-edit': 'campaign', 'select-edit': 'select', 'guide-partial': 'guide', 'guide-confirmed': 'guide', 'guide-send': 'guide', 'monitor-sent': 'monitor' };
+  var VIEWS = ['campaign', 'select', 'select-edit', 'generating', 'guide', 'guide-partial', 'guide-confirmed', 'guide-send', 'monitor', 'monitor-sent', 'detail'];
+  var VIEW_SCREEN = { 'select-edit': 'select', 'guide-partial': 'guide', 'guide-confirmed': 'guide', 'guide-send': 'guide', 'monitor-sent': 'monitor' };
   var STAGES = ['Analyzing the influencer', 'Shaping the content strategy', 'Writing platform guides'];
 
   /* ── DOM helpers ── */
@@ -6954,10 +6945,10 @@ button { font-family: inherit; }
       mFilter: 'all', mQuery: '', mDetail: 'cvt', mPost: null, mSent: false,
       briefs: {}, sentAt: '',
       // The agent's setup, locked until edited: *Editing is open now, *Edited has changed.
-      campEditing: false, campEdited: false, selEditing: false, selEdited: false,
-      runStale: false
+      selEditing: false, selEdited: false,
+      runStale: false, generated: false   // generated: this run has reached the guide, so step 3 opens
     };
-    state.form = freshForm(sc.campaign);
+    state.form = freshForm('');
     computeRun();
     $$('[data-filter]').forEach(function (f) { f.value = state.filters[f.getAttribute('data-filter')]; });
     bind('mnSearch').value = '';
@@ -7079,6 +7070,7 @@ button { font-family: inherit; }
   }
   function pendingSelected() { return state.selected.filter(function (id) { return state.pending[id]; }).length; }
   function renderSelection() {
+    stepGuideOpen();   // a changed list closes step 3 until the guide is generated again
     var n = state.selected.length;
     bind('selCount').textContent = n ? plural(n, 'influencer selected', 'influencers selected') : 'No influencers selected';
     bind('selClear').hidden = !n || !state.selEditing;
@@ -7159,8 +7151,7 @@ button { font-family: inherit; }
       b.addEventListener('click', function () {
         var i = state.form.products.indexOf(p[0]);
         if (i === -1) state.form.products.push(p[0]); else state.form.products.splice(i, 1);
-        state.campEdited = true;
-        renderProducts(); renderCampaignMode(); bindGuideCampaign();
+        renderProducts(); bindGuideCampaign();
       });
       box.appendChild(b);
     });
@@ -7172,6 +7163,7 @@ button { font-family: inherit; }
       if (flash && state.form[k]) { f.classList.remove('bc-filled'); void f.offsetWidth; f.classList.add('bc-filled'); }
     });
     $('[data-field="campaign"]').classList.toggle('is-empty', !state.form.campaign);
+    $('[data-field="campaign"]').classList.remove('is-invalid');
     renderDates();
     renderProducts();
     bind('formError').hidden = true;
@@ -7191,31 +7183,15 @@ button { font-family: inherit; }
     label.addEventListener('click', open);
     input.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') open(e); });
   });
-  function renderCampaignMode() {
-    var editing = state.campEditing, form = $('.bc-form');
-    form.classList.toggle('is-locked', !editing);
-    $$('[data-field]', form).forEach(function (f) {
-      if (f.tagName === 'SELECT' || f.type === 'date') f.disabled = !editing; else f.readOnly = !editing;
-    });
-    $$('.bc-toggle', form).forEach(function (b) { b.disabled = !editing; });
-    bind('createCampaign').hidden = !editing;
-    setSource(bind('campSource'), editing ? 'editing' : state.campEdited ? 'edited' : 'agent', 'Prefilled by agent');
-    var btn = bind('editCampaign');
-    btn.setAttribute('aria-pressed', String(editing));
-    $('span', btn).textContent = editing ? 'Done editing' : 'Edit Campaign';
-  }
   function initForm() {
     $$('[data-field]').forEach(function (f) {
       var k = f.getAttribute('data-field');
       f.addEventListener(f.tagName === 'SELECT' ? 'change' : 'input', function () {
-        state.campEdited = true;
         if (k === 'campaign') {
           var id = f.value, keep = state.form;
           state.form = id ? freshForm(id) : keep;
-          if (id && !CAMPAIGNS.some(function (c) { return c.id === id; })) state.form = { campaign: id, start: '', end: '', products: [], hashtags: '', basics: '', direction: '' };
           if (!id) state.form.campaign = '';
           renderForm(true);
-          renderCampaignMode();
           return;
         }
         state.form[k] = f.value;
@@ -7471,7 +7447,6 @@ button { font-family: inherit; }
     closeDialogs();
     var prev = state.screen;
     state.screen = screen;
-    if (screen !== 'campaign') state.campEditing = false;
     if (screen !== 'select') state.selEditing = false;
     var sectionFor = { campaign: 'campaign', select: 'select', generating: 'select', guide: 'guide', monitor: 'monitor', detail: 'detail' };
     $$('.bc-screen').forEach(function (s) {
@@ -7481,8 +7456,8 @@ button { font-family: inherit; }
     });
     if (screen !== 'generating') bind('gen').hidden = true;
     if (screen === 'select') { renderTable(); renderSelection(); renderSelectContext(); renderSelectMode(); }
-    if (screen === 'campaign') { if (prev !== 'campaign' || opts.instant) renderForm(false); renderCampaignMode(); }
-    if (screen === 'guide') { if (!opts.flow) computeRun(); renderGuides(); }
+    if (screen === 'campaign' && (prev !== 'campaign' || opts.instant)) renderForm(false);
+    if (screen === 'guide') { if (!opts.flow) computeRun(); renderGuides(); state.generated = true; }
     if (screen === 'generating') startGeneration(!!opts.flow);
     var inFlow = SCREENS.indexOf(screen) < 4;
     if (inFlow) state.mSent = false;
@@ -7501,6 +7476,7 @@ button { font-family: inherit; }
       if (i === stepIndex) s.setAttribute('aria-current', 'step'); else s.removeAttribute('aria-current');
       var link = $('.bc-step-link', s); if (link) link.classList.toggle('is-on', i <= stepIndex);
     });
+    stepGuideOpen();
     $('.bc-steps').hidden = !inFlow;
     $('[data-action="reset"]').hidden = !inFlow || screen === 'guide';
     bind('sendbar').hidden = screen !== 'guide' || !state.guides.length;
@@ -7523,7 +7499,6 @@ button { font-family: inherit; }
   // The view on screen right now, read from live state, so the toolbar follows
   // clicks made in the page as well as its own jumps.
   function currentView() {
-    if (state.screen === 'campaign') return state.campEditing ? 'campaign-edit' : 'campaign';
     if (state.screen === 'select') return state.selEditing ? 'select-edit' : 'select';
     if (state.screen === 'guide') {
       if (bind('sendDialog').open) return 'guide-send';
@@ -7540,8 +7515,9 @@ button { font-family: inherit; }
     if (d.open) d.close('cancel');
     state.mSent = v === 'monitor-sent';
     if (state.mSent) bind('mnBannerText').innerHTML = sentBanner(state.guides);
-    // Steps 1 and 2 as the agent set them up, or opened for editing.
-    if (screenOf(v) === 'campaign') state.campEditing = v === 'campaign-edit';
+    // Past step 1 the screens need a campaign; a jump from a blank form uses the preset.
+    if (screenOf(v) !== 'campaign' && !state.form.campaign) { state.form = freshForm(SETUP.campaign); renderForm(false); }
+    // Step 2 as the agent suggested it, or opened for editing.
     if (screenOf(v) === 'select') state.selEditing = v === 'select-edit';
     go(screenOf(v), opts);
     if (screenOf(v) === 'guide') {
@@ -7567,6 +7543,21 @@ button { font-family: inherit; }
     $('.bc-tb [data-nav="1"]').disabled = at === list.length - 1;
     var hash = '#' + v;
     if (location.hash !== hash) history.replaceState(null, '', hash);
+  }
+  // Step 3 opens once this run has a guide, and closes again when the list changes.
+  function stepGuideOpen() {
+    var b = $('.bc-step-btn[data-step="guide"]'), open = state.generated && !state.runStale;
+    b.disabled = !open;
+    b.title = open ? '' : 'Generate a guide first';
+  }
+  // Moving on from step 1 needs a campaign.
+  function campaignPicked() {
+    if (state.form.campaign) return true;
+    var err = bind('formError'), f = $('[data-field="campaign"]');
+    err.textContent = 'Choose a campaign to continue.';
+    err.hidden = false;
+    f.classList.add('is-invalid'); f.focus();
+    return false;
   }
   function stepView(delta) {
     var list = viewList(), next = list[list.indexOf(currentView()) + delta];
@@ -7621,25 +7612,17 @@ button { font-family: inherit; }
     setTimeout(function () { renderTable(); renderSelection(); }, 0);
   });
 
-  $('[data-dialog="create"] form').addEventListener('submit', function (e) {
-    var submitter = e.submitter;
-    if (!submitter || submitter.value !== 'create') return;
-    var name = e.target.name.value.trim(), err = $('[data-error="name"]', e.target);
-    err.hidden = !!name; e.target.name.classList.toggle('is-invalid', !name);
-    if (!name) { e.preventDefault(); return; }
-    var id = 'custom-' + Date.now();
-    state.campaigns.push({ id: id, name: name, start: '', end: '', products: [], hashtags: '', basics: '', direction: '' });
-    state.form = { campaign: id, start: '', end: '', products: [], hashtags: '', basics: '', direction: '' };
-    state.campEdited = true;
-    setTimeout(function () { renderForm(true); renderCampaignMode(); }, 0);
-  });
-
   /* ── Actions ── */
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-action], [data-goto], .bc-tb [data-nav], [data-page]');
+    var t = e.target.closest('[data-action], [data-goto], [data-step], .bc-tb [data-nav], [data-page]');
     if (!t || t.disabled) return;
     var a = t.getAttribute('data-action');
     if (t.hasAttribute('data-goto')) return showView(t.getAttribute('data-goto'));
+    if (t.hasAttribute('data-step')) {
+      var step = t.getAttribute('data-step');
+      if (step === state.screen || (step === 'select' && state.screen === 'campaign' && !campaignPicked())) return;
+      return go(step, { flow: true });
+    }
     if (t.hasAttribute('data-nav')) return stepView(Number(t.getAttribute('data-nav')));
     if (t.hasAttribute('data-page')) {
       state.page = Math.max(0, Math.min(state.guides.length - 1, state.page + Number(t.getAttribute('data-page'))));
@@ -7649,39 +7632,30 @@ button { font-family: inherit; }
       return;
     }
     switch (a) {
-      case 'next-select': return go('select', { flow: true });
-      case 'clear': state.selected = []; state.selEdited = true; renderTable(); renderSelection(); return;
+      case 'next-select': return campaignPicked() && go('select', { flow: true });
+      case 'clear': state.selected = []; state.selEdited = true; state.runStale = true; renderTable(); renderSelection(); return;
       case 'select-visible': {
         var rows = visibleRows(), all = rows.every(function (r) { return state.selected.indexOf(r.id) !== -1; });
+        state.runStale = true;
         if (all) state.selected = state.selected.filter(function (id) { return !rows.some(function (r) { return r.id === id; }); });
         else rows.forEach(function (r) { if (state.selected.indexOf(r.id) === -1 && state.selected.length < MAX_SELECTED) state.selected.push(r.id); });
         renderTable(); renderSelection(); return;
       }
       case 'open-add': return addInfluencer();
-      case 'open-create': {
-        var d = $('[data-dialog="create"]'); $('form', d).reset();
-        $('[data-error="name"]', d).hidden = true; $('.bc-input', d).classList.remove('is-invalid');
-        return openDialog('create');
-      }
       case 'back': return go('campaign', { flow: true });
       case 'generate': return handleGenerate();
-      case 'edit-campaign':
-        state.campEditing = !state.campEditing;
-        renderCampaignMode(); syncView();
-        if (state.campEditing) $('[data-field="campaign"]').focus();
-        return;
       case 'edit-selection':
         state.selEditing = !state.selEditing;
         renderTable(); renderSelection(); renderSelectMode(); syncView();
         if (state.selEditing) $('[data-filter="q"]').focus();
         return;
       case 'reset': {
-        // Back to what the upstream agent set up: its campaign and its suggested influencers.
+        // Back to a blank campaign and the upstream agent's suggested influencers.
         var setup = SETUP;
-        state.selected = setup.selected.slice(); state.form = freshForm(setup.campaign);
+        state.selected = setup.selected.slice(); state.form = freshForm(''); state.generated = false;
         state.filters = { q: '', subs: 'all', tier: 'all', pp: 'all', aff: 'SAMSUNG' };
         $$('[data-filter]').forEach(function (f) { f.value = state.filters[f.getAttribute('data-filter')]; });
-        state.campEdited = false; state.selEdited = false;
+        state.selEdited = false;
         renderForm(false); return go('campaign');
       }
       case 'restart': return resetRun('monitor');
@@ -7719,62 +7693,70 @@ button { font-family: inherit; }
   function measure() {
     var header = $('.bc-page-header');
     root.style.setProperty('--bc-header-h', header.getBoundingClientRect().height + 'px');
+    measureHeaderBottom();
     var tb = bind('toolbar');
     if (!tb.classList.contains('is-hidden')) root.style.setProperty('--bc-toolbar-h', tb.offsetHeight + 'px');
   }
   window.addEventListener('resize', measure);
+  // The top bar scrolls away above the sticky header, so the header's bottom
+  // edge moves; overlays that start under the header follow it.
+  function measureHeaderBottom() {
+    root.style.setProperty('--bc-header-bottom', Math.max(0, $('.bc-page-header').getBoundingClientRect().bottom) + 'px');
+  }
+  window.addEventListener('scroll', measureHeaderBottom, { passive: true });
 
 
   /* ═══ 5 Monitor · 6 Monitoring detail ═══
      Imagined end to end: no backend tracks posts against briefs yet. Clusters,
      posts and checks are synthetic; the check vocabulary (product, CXP labels)
-     is the AI Labeler's own. The Monitor is shown as of 2026.10.12. */
-  var M_TODAY = '10.12';
+     is the AI Labeler's own. The Monitor is shown as of 2027.01.21. Post
+     dates are MM.DD within M_YEAR. */
+  var M_YEAR = '2027', M_TODAY = '2027.01.21', M_SINCE = '2026.12.22'; // "last 30 days"
   var PLATFORM = { instagram: ['InstagramLogo', 'Instagram'], tiktok: ['TiktokLogo', 'TikTok'], youtube: ['YoutubeLogo', 'YouTube'] };
   var M_CLUSTERS = [
-    { id: 'cvt', name: 'Me, Unfiltered #withGalaxy', subs: 'SEA', stage: 'Posting', start: '2026.10.05', end: '2026.10.31', day: 8, days: 27,
-      sent: '2026.09.24', hashtags: ['#withGalaxy', '#GalaxyS27Ultra', '#TeamGalaxy', '#MeUnfiltered'], product: 'Galaxy S27 Ultra', cxp: 'Camera & Zoom', target: 2.3,
+    { id: 'cvt', name: 'Me, Unfiltered #withGalaxy', subs: 'SEA', stage: 'Posting', start: '2027.01.14', end: '2027.01.31', day: 8, days: 18,
+      sent: '2027.01.05', hashtags: ['#withGalaxy', '#GalaxyS27Ultra', '#TeamGalaxy', '#MeUnfiltered'], product: 'Galaxy S27 Ultra', cxp: 'Camera & Zoom', target: 2.3,
       people: ['emma', 'jordan', 'nina', 'kyle', 'zina'],
-      briefState: { emma: 'Brief confirmed 09.25', jordan: 'Brief opened 09.24', nina: 'Brief confirmed 09.26',
-        kyle: 'Brief confirmed 09.25', zina: 'Brief confirmed 09.27' } }
+      briefState: { emma: 'Brief confirmed 01.06', jordan: 'Brief opened 01.05', nina: 'Brief confirmed 01.07',
+        kyle: 'Brief confirmed 01.06', zina: 'Brief confirmed 01.08' } }
   ];
   // Posts for the flow's own cluster, written out in full.
   var CVT_POSTS = [
-    { id: 'p1', who: 'emma', platform: 'instagram', kind: 'Reel', date: '10.07', time: '18:40',
+    { id: 'p1', who: 'emma', platform: 'instagram', kind: 'Reel', date: '01.16', time: '18:40',
       caption: 'Between takes. One take, no edits, straight off the Galaxy S27 Ultra.',
       tags: ['#withGalaxy', '#GalaxyS27Ultra', '#TeamGalaxy', '#MeUnfiltered'],
       checks: [['Hashtags', 'pass', '4 of 4 in caption'], ['Product', 'pass', 'Galaxy S27 Ultra named in caption and in frame'],
         ['CXP point', 'pass', 'Camera UI visible mid-capture · label 소구 CXP_Camera_Zoom'],
-        ['Posting window', 'pass', 'Posted 10.07 18:40 KST, inside 10.05 – 10.31'], ['Disclosure', 'pass', 'Paid partnership label with Samsung']],
+        ['Posting window', 'pass', 'Posted 01.16 18:40 KST, inside 01.14 – 01.31'], ['Disclosure', 'pass', 'Paid partnership label with Samsung']],
       er: (276000 + 2191) / 11100000 * 100, base: 3.1, reach: '11.1M', likes: '276K', comments: '2,191' },
-    { id: 'p3', who: 'nina', platform: 'tiktok', kind: 'Video · 0:19', date: '10.08', time: '12:40',
+    { id: 'p3', who: 'nina', platform: 'tiktok', kind: 'Video · 0:19', date: '01.17', time: '12:40',
       caption: 'Getting ready, first take only. Shot on the Galaxy S27 Ultra.', tags: ['#withGalaxy', '#GalaxyS27Ultra', '#TeamGalaxy'],
       checks: [['Hashtags', 'part', '3 of 4 · #MeUnfiltered missing'], ['Product', 'pass', 'Held as mirror viewfinder, 0:03 – 0:11'],
         ['CXP point', 'pass', 'Optical zoom pulls the room detail · label 소구 CXP_Camera_Zoom'],
-        ['Posting window', 'pass', 'Posted 10.08 12:40 KST, inside 10.05 – 10.31'], ['Disclosure', 'pass', '#ad in caption']],
+        ['Posting window', 'pass', 'Posted 01.17 12:40 KST, inside 01.14 – 01.31'], ['Disclosure', 'pass', '#ad in caption']],
       er: 11.4, base: 9.6, reach: '128K', likes: '14.2K', comments: '390' },
-    { id: 'p4', who: 'jordan', platform: 'youtube', kind: 'Video · 11:42', date: '10.11', time: '09:00',
+    { id: 'p4', who: 'jordan', platform: 'youtube', kind: 'Video · 11:42', date: '01.20', time: '09:00',
       caption: 'A day in the West Village, shot start to finish on the Galaxy S27 Ultra. No edits.', tags: ['#withGalaxy', '#GalaxyS27Ultra', '#TeamGalaxy', '#MeUnfiltered'],
       checks: [['Hashtags', 'pass', '4 of 4 in description'], ['Product', 'pass', 'In hand at every stop, 6 scenes'],
         ['CXP point', 'part', 'Optical zoom shown once, at 07:12'],
-        ['Posting window', 'pass', 'Posted 10.11 09:00 KST, inside 10.05 – 10.31'], ['Disclosure', 'fail', '"Includes paid promotion" not set; no disclosure in description']],
+        ['Posting window', 'pass', 'Posted 01.20 09:00 KST, inside 01.14 – 01.31'], ['Disclosure', 'fail', '"Includes paid promotion" not set; no disclosure in description']],
       er: 3.8, base: 4.1, reach: '410K', likes: '9.8K', comments: '612' },
-    { id: 'p5', who: 'kyle', platform: 'youtube', kind: 'Video · 4:52', date: '10.09', time: '19:20',
+    { id: 'p5', who: 'kyle', platform: 'youtube', kind: 'Video · 4:52', date: '01.18', time: '19:20',
       caption: 'One take from the bridge, no grade and no cut, shot on the Galaxy S27 Ultra as the light went.',
       tags: ['#withGalaxy', '#GalaxyS27Ultra', '#TeamGalaxy', '#MeUnfiltered'],
       checks: [['Hashtags', 'pass', '4 of 4 in the description'],
         ['Product', 'part', 'Galaxy S27 Ultra in hand from 01:40 but held low and out of focus for most of the take'],
         ['CXP point', 'part', 'Optical zoom shown once, at 03:05, and only briefly · label 소구 CXP_Camera_Zoom'],
-        ['Posting window', 'pass', 'Posted 10.09 19:20 KST, inside 10.05 – 10.31'],
+        ['Posting window', 'pass', 'Posted 01.18 19:20 KST, inside 01.14 – 01.31'],
         ['Disclosure', 'pass', '"Includes paid promotion" set on the video']],
       er: (142000 + 3860) / 1900000 * 100, base: null, reach: '1.9M', likes: '142K', comments: '3,860' },
-    { id: 'p6', who: 'zina', platform: 'instagram', kind: 'Carousel · 4 images', date: '10.10', time: '09:10',
+    { id: 'p6', who: 'zina', platform: 'instagram', kind: 'Carousel · 4 images', date: '01.19', time: '09:10',
       caption: 'Two years since we found Lucy. First frame of the morning, kept exactly as it came.',
       tags: ['#withGalaxy', '#TeamGalaxy', '#MeUnfiltered'],
       checks: [['Hashtags', 'part', '3 of 4 · #GalaxyS27Ultra missing'],
         ['Product', 'pass', 'Galaxy S27 Ultra held in the third frame of the carousel'],
         ['CXP point', 'pass', 'Optical zoom on the second frame, shot from across the yard · label 소구 CXP_Camera_Zoom'],
-        ['Posting window', 'pass', 'Posted 10.10 09:10 KST, inside 10.05 – 10.31'],
+        ['Posting window', 'pass', 'Posted 01.19 09:10 KST, inside 01.14 – 01.31'],
         ['Disclosure', 'pass', 'Paid partnership label with Samsung']],
       er: (38400 + 1120) / 412000 * 100, base: null, reach: '412K', likes: '38.4K', comments: '1,120' },
   ];
@@ -7869,7 +7851,7 @@ button { font-family: inherit; }
   function monitorNote() {
     var names = mPeople(M_CLUSTERS[0]).map(function (id) { return mPerson(id).name; });
     var who = names.length > 1 ? names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1] : names[0];
-    return '<b>Monitor, as of 2026.10.12.</b> Imagined, with no backend yet. Me, Unfiltered is this run, day 8 of its posting window: ' + who + '.';
+    return '<b>Monitor, as of ' + M_TODAY + '.</b> Imagined, with no backend yet. Me, Unfiltered is this run, day 8 of its posting window: ' + who + '.';
   }
 
   /* 5 · Monitor */
@@ -7880,8 +7862,8 @@ button { font-family: inherit; }
     var briefsSent = sums.reduce(function (n, x) { return n + x.s.sent; }, 0);
     var live = sums.filter(function (x) { return ['Posting', 'Review', 'Closed'].indexOf(x.c.stage) !== -1; });
     var postsLive = live.reduce(function (n, x) { return n + x.s.posts.length; }, 0);
-    // Last 30 days: posts dated 09.12 – 10.12.
-    var recent = sums.reduce(function (all, x) { return all.concat(x.s.posts); }, []).filter(function (p) { return p.date >= '09.12' && p.date <= M_TODAY; });
+    // Last 30 days: posts dated 2026.12.22 – 2027.01.21, compared with the year so the window can cross one.
+    var recent = sums.reduce(function (all, x) { return all.concat(x.s.posts); }, []).filter(function (p) { var d = M_YEAR + '.' + p.date; return d >= M_SINCE && d <= M_TODAY; });
     var recentAdh = mAvg(recent, 'score');
     var withIssues = recent.filter(function (p) { return p.score < 100; }).length;
     bind('mnKpis').innerHTML =
@@ -7917,7 +7899,7 @@ button { font-family: inherit; }
       var posts = s.posts.length + '<small>' + (c.stage === 'Draft' || c.stage === 'Sent' ? 'window not open' : 'in the window') + '</small>';
       var win = c.stage === 'Posting' ? 'Day ' + c.day + ' of ' + c.days : c.win;
       return '<button type="button" class="mn-row' + (c.id === 'cvt' && state.mSent ? ' is-current' : '') + '" data-mn-open="' + c.id + '">' +
-        '<span class="mn-name"><b>' + mEsc(c.name) + '</b><small>' + c.subs + ' · ' + plural(s.people.length, 'influencer', 'influencers') + '</small></span>' +
+        '<span class="mn-name"><b>' + mEsc(c.name) + '</b><small>' + c.subs + ' · ' + plural(s.people.length, 'Influencer', 'Influencers') + '</small></span>' +
         '<span>' + mStack(s.people) + '</span>' +
         '<span class="mn-win"><b>' + c.start + ' – ' + c.end.slice(5) + '</b><span class="mn-bar" aria-hidden="true"><i style="width:' + mWindowPct(c) + '%"></i></span><small>' + mEsc(win) + '</small></span>' +
         '<span class="mn-count">' + briefs + '</span><span class="mn-count">' + posts + '</span>' +
@@ -7950,7 +7932,7 @@ button { font-family: inherit; }
       state.mPost = first ? first.id : null;
     }
     bind('mnCrumb').textContent = c.name;
-    var meta = c.subs + ' · ' + plural(s.people.length, 'influencer', 'influencers') + ' · ' + (c.sent ? 'briefs sent ' + c.sent : 'briefs not sent yet');
+    var meta = c.subs + ' · ' + plural(s.people.length, 'Influencer', 'Influencers') + ' · ' + (c.sent ? 'briefs sent ' + c.sent : 'briefs not sent yet');
     var windowFact = c.start + ' – ' + c.end.slice(5) + ' <span class="mn-muted">· ' + mEsc(c.stage === 'Posting' ? 'Day ' + c.day + ' of ' + c.days : c.win) + '</span>';
     var sum = '<div><span class="mn-k">Posts in window</span><b>' + s.posts.length + '</b></div>' +
       '<div><span class="mn-k">Avg adherence</span>' + mScore(s.adh) + '</div>' +
@@ -8004,7 +7986,7 @@ button { font-family: inherit; }
       return '<li class="mn-check mn-' + ch[1] + '"><span class="mn-check-ic">' + mIcon(ic, 'bold') + '</span><div><div class="mn-check-head"><b>' + ch[0] + '</b><span class="mn-check-st">' + word + '</span></div><p>' + mEsc(ch[2]) + '</p></div></li>';
     }).join('');
     review.innerHTML =
-      '<div class="bc-card"><div class="mn-panel-title"><div><h3>' + mEsc(mPerson(post.who).name) + ' · ' + PLATFORM[post.platform][1] + '</h3><p>' + post.kind + ' · 2026.' + post.date + ' ' + post.time + '</p></div></div>' +
+      '<div class="bc-card"><div class="mn-panel-title"><div><h3>' + mEsc(mPerson(post.who).name) + ' · ' + PLATFORM[post.platform][1] + '</h3><p>' + post.kind + ' · ' + M_YEAR + '.' + post.date + ' ' + post.time + '</p></div></div>' +
         mThumb(post, true) + '<p class="mn-cap">' + mCaption(post, c) + '</p>' +
         '<div class="mn-eng"><div><b>' + post.likes + '</b>Likes</div><div><b>' + post.comments + '</b>Comments</div><div><b>' + post.reach + '</b>Potential reach</div></div></div>' +
       '<div class="bc-card"><div class="mn-panel-title"><div><h3>Brief adherence</h3><p>' + post.checks.length + ' checks from the brief · product and CXP labels from the AI Labeler</p></div>' + mScore(post.score, true) + '</div>' +
@@ -8049,7 +8031,7 @@ button { font-family: inherit; }
   /* ── Boot ── */
   initFilters();
   initForm();
-  function renderAll() { renderTable(); renderSelection(); renderForm(false); renderCampaignMode(); }
+  function renderAll() { renderTable(); renderSelection(); renderForm(false); }
   function fromHash() {
     var m = /^#([a-z-]+)$/.exec(location.hash);
     // No view in the address: open on step 1, Campaign (was the Monitor).

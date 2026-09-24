@@ -1,0 +1,31 @@
+/* Flow Agent · top bar. The bar Performance Analyst draws above its title
+   (its bundle's bO/Ch components), rebuilt for Influencer Recruiter and Brief
+   Curator so all three agents share it: 56px, menu on the left, then the
+   host's utility items (admin, notifications, User Manual, Other links).
+   On phones the item labels give way to their icons, as in PA. */
+.flow-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px; padding: 0 8px 0 12px; box-sizing: border-box;
+  background: #FBFBFB; border-bottom: 1px solid #CECECE; color: #263144;
+  font: 400 16px/1.4 "Samsung SS Body", "SamsungSSBody", -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.flow-topbar * { box-sizing: border-box; }
+.flow-topbar img { display: block; max-width: none; flex: 0 0 auto; }
+.flow-topbar__menu {
+  display: flex; align-items: center; justify-content: center; flex: 0 0 auto;
+  width: 32px; height: 32px; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer;
+}
+.flow-topbar__menu:focus-visible { outline: 2px solid #0380FE; outline-offset: 2px; border-radius: 4px; }
+.flow-topbar__items { display: flex; align-items: center; min-width: 0; }
+.flow-topbar__item {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  height: 56px; padding: 16px; border-right: 1px solid #E0E0E0;
+}
+.flow-topbar__item:last-child { border-right: 0; }
+.flow-topbar__label { font: 700 16px/1 "Samsung SS Body", "SamsungSSBody", -apple-system, "Segoe UI", sans-serif; white-space: nowrap; }
+/* The labels need ~590px on one line; below 600px the icons carry the bar. */
+@media (max-width: 599px) {
+  .flow-topbar__label { display: none; }
+  .flow-topbar__item { padding: 16px 10px; }
+}

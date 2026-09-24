@@ -4,23 +4,118 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Flow Agent</title>
-<!-- Flow Agent · entry point. Opens on Performance Analyst and hosts the flow in
-     one full-window frame, so the address bar stays on the site root while
-     people move between Performance Analyst, Influencer Recruiter and Brief
-     Curator. Each page still works on its own at its own address. -->
+<!-- Flow Agent · entry point. Hosts the flow in one full-window frame and
+     mirrors where the frame is into this page's address, so a refresh or a
+     shared link reopens the same agent and screen:
+       /#pa                 Performance Analyst (the default)
+       /#recruiter/detail   Influencer Recruiter, on its #detail view
+       /#brief/monitor      Brief Curator, on its #monitor view
+     Each screen change and each move between agents is a history entry here
+     (the frame itself adds none), so Back steps through screens, also after
+     a refresh.
+     Each page still works on its own at its own address. -->
 <style>
   html, body { margin: 0; height: 100%; background: #FBFBFB; }
   #flow { display: block; width: 100%; height: 100%; border: 0; }
 </style>
 </head>
 <body>
-<iframe id="flow" src="PA-demo-v4.html" title="Flow Agent"></iframe>
 <script>
-  // The tab title follows the page inside the frame.
-  var flow = document.getElementById('flow');
+  // Built here under a fresh name each load: a browser restores a named frame's
+  // old address on Back/Forward after a reload, which would override the
+  // screen this page asks for.
+  var flow = document.createElement('iframe');
+  flow.id = 'flow';
+  flow.title = 'Flow Agent';
+  flow.name = 'flow-' + Date.now().toString(36) + Math.random().toString(36).slice(2);
+  var PAGES = { pa: 'PA-demo-v4.html', recruiter: 'Influencer_Recruiter.html', brief: 'Brief_Curator.html' };
+  // Views that move on by themselves; Back never stops on them.
+  var TRANSIENT = ['generating', 'job-running'];
+
+  // A place in the flow: agent, its view (the page's own #hash) and any query
+  // the agent was opened with (PA hands the recruiter its search that way).
+  function parse(hash) {
+    var m = /^#(pa|recruiter|brief)(?:\/([a-z-]+))?(\?[^#]*)?$/.exec(hash || '');
+    return m ? { page: m[1], view: m[2] || '', search: m[3] || '' } : null;
+  }
+  function key(s) { return '#' + s.page + (s.view ? '/' + s.view : '') + s.search; }
+  function src(s) { return new URL(PAGES[s.page] + s.search + (s.view ? '#' + s.view : ''), location.href).href; }
+  function place(url) {
+    var file = url.pathname.split('/').pop();
+    for (var p in PAGES) if (PAGES[p] === file) return { page: p, view: url.hash.replace(/^#/, ''), search: url.search };
+    return null;
+  }
+  function current() {
+    try { return place(new URL(flow.contentWindow.location.href)); } catch (e) { return null; }
+  }
+
+  var shown = parse(location.hash) || { page: 'pa', view: '', search: '' };
+  history.replaceState(null, '', key(shown));
+  flow.src = src(shown);
+  document.body.appendChild(flow);
+
+  // The frame never adds history of its own (it only ever replaces its
+  // address); every step is an entry here, so Back and Forward work the same
+  // before and after a refresh.
+  function go(url) {
+    var u = new URL(url, flow.contentWindow.location.href), s = place(u);
+    if (!s) return false;
+    history.pushState(null, '', key(s));
+    shown = s;
+    flow.contentWindow.location.replace(u.href);
+    return true;
+  }
+  // A new screen in the same agent is a new entry; anything else replaces the
+  // entry (a transient view gives way to the next one).
+  function sync(loaded) {
+    var s = current();
+    if (!s) return;
+    var k = key(s);
+    if (k === location.hash) { shown = s; return; }
+    var push = !loaded && s.page === shown.page && s.view !== shown.view && TRANSIENT.indexOf(shown.view) === -1;
+    history[push ? 'pushState' : 'replaceState'](null, '', k);
+    shown = s;
+  }
+
   flow.addEventListener('load', function () {
     try { document.title = flow.contentDocument.title || 'Flow Agent'; } catch (e) {}
     try { flow.contentWindow.focus(); } catch (e) {} // keyboard shortcuts work without a first click
+    try {
+      var w = flow.contentWindow;
+      // The pages keep their view in their hash with history.replaceState, which
+      // fires no event, so listen at the source.
+      ['pushState', 'replaceState'].forEach(function (m) {
+        var orig = w.history[m];
+        w.history[m] = function () { var r = orig.apply(this, arguments); sync(false); return r; };
+      });
+      w.addEventListener('hashchange', function () { sync(false); });
+      // Links to an agent (the AIM rail, PA's recruiter hand-off) and scripted
+      // hand-offs (window.flowNavigate) go through go().
+      w.flowNavigate = go;
+      w.document.addEventListener('click', function (e) {
+        if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a || (a.target && a.target !== '_self')) return;
+        var u = new URL(a.getAttribute('href'), w.location.href);
+        if (u.origin !== location.origin || u.href === w.location.href || !place(u)) return;
+        e.preventDefault();
+        go(u.href);
+      }, true);
+    } catch (e) {}
+    sync(true);
+  });
+
+  // Back / Forward: move the frame to the entry's place without adding history.
+  window.addEventListener('popstate', function () {
+    var s = parse(location.hash);
+    if (!s) { s = { page: 'pa', view: '', search: '' }; history.replaceState(null, '', key(s)); }
+    var c = current();
+    shown = s;
+    try {
+      var fl = flow.contentWindow.location;
+      if (c && c.page === s.page && c.search === s.search) { if (c.view !== s.view) fl.replace(fl.href.split('#')[0] + '#' + s.view); }
+      else fl.replace(src(s));
+    } catch (e) { flow.src = src(s); }
   });
 </script>
 </body>
