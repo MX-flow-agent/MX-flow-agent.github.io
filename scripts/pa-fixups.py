@@ -27,6 +27,8 @@ Fixes:
   top-bar         top bar labels give way to icons below 600px
   map-header      map section header wraps its segmented control
   long-list       Long-list rows share one min width (aligned, full borders)
+  recruiter-cta   the "Find candidates via Recruiter Agent" button under the
+                  influencer list links where the chat's button does
   css             the fx-fit stylesheet those hooks rely on
 """
 import re
@@ -247,6 +249,21 @@ def fix_long_list(s):
     return s, True
 
 
+def fix_recruiter_cta(s):
+    # The chat's CTA is a real link; the one under the Long-list is a styled span.
+    # Point it at the same address (read from the chat's), so both stay in sync.
+    href = one(r'\.cta&&' + ID + r'\.jsxs\("a",\{href:"(Influencer_Recruiter\.html[^"]*)"', s, 'chat Recruiter CTA').group(1)
+    head = (r'(function ' + ID + r'\(\)\{return (' + ID + r')\.jsx\("div",\{className:"border-t px-4 py-3",style:\{borderColor:' +
+            ID + r'\.subtleColor\},children:\2\.jsxs\()')
+    tail = r'(,style:\{background:"linear-gradient\(135deg, #0380FE 0%, #0079CD 100%\)"[^}]*\},children:\["Find candidates via Recruiter Agent")'
+    if re.search(head + r'"a",\{href:"' + re.escape(href) + '"', s):
+        return s, False
+    m = one(head + r'"span",\{className:"flex items-center justify-center gap-1\.5 rounded-\[10px\] px-4 py-3 text-\[13px\] font-bold"' + tail,
+            s, 'Long-list Recruiter CTA')
+    return (s[:m.start()] + m.group(1) + '"a",{href:"' + href + '",className:"flex items-center justify-center gap-1.5 rounded-[10px] '
+            'px-4 py-3 text-[13px] font-bold transition-opacity hover:opacity-90"' + m.group(3) + s[m.end():]), True
+
+
 def fix_css(s):
     block = re.search(r'<style id="fx-fit">.*?</style>', s, re.S)
     if block:
@@ -262,7 +279,7 @@ FIXES = [
     ('kpi-cards', fix_kpi_cards), ('trend-cards', fix_trend_cards), ('legend', fix_legend),
     ('portfolio', fix_portfolio), ('bars', fix_bars), ('deep-dive', fix_deep_dive),
     ('impact-column', fix_impact_column), ('top-bar', fix_top_bar), ('map-header', fix_map_header),
-    ('long-list', fix_long_list), ('css', fix_css),
+    ('long-list', fix_long_list), ('recruiter-cta', fix_recruiter_cta), ('css', fix_css),
 ]
 
 
