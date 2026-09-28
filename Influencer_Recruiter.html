@@ -6302,8 +6302,11 @@ class Component extends DCLogic {
         pickSuggest: e => { e.preventDefault(); this.setState(st => { const next = st.postCounts.slice(); next[i] = String(p[2]); return { postCounts: next, suggest: null }; }); },
         setCount: e => this.setState(st => { const next = st.postCounts.slice(); next[i] = e.target.value.replace(/[^0-9]/g, '').slice(0, 3); return { postCounts: next }; })
       })),
-      // the green note shows for the suggested amount only, picked or typed
-      amountOk: Number(String(s.amount).replace(/[^0-9.]/g, '')) === AMOUNT_SUGGEST,
+      // the green note shows for any amount inside the recommended band (the chart's blue box), ends included
+      amountOk: (() => {
+        const v = Number(String(s.amount).replace(/[^0-9.]/g, ''));
+        return dealReady && String(s.amount).trim() !== '' && v >= PAY.recMin * postTotal && v <= PAY.recMax * postTotal;
+      })(),
       amountSuggest: num(AMOUNT_SUGGEST), amountSuggestOpen: s.suggest === 'amount',
       openAmountSuggest: () => this.setState({ suggest: 'amount' }),
       pickAmount: e => { e.preventDefault(); this.setState({ amount: num(AMOUNT_SUGGEST), suggest: null }); },
