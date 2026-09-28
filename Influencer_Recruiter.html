@@ -5951,20 +5951,30 @@ const maskDate = v => {
 };
 const isFullDate = v => /^\d{4}\.\d{2}\.\d{2}$/.test(String(v).trim());
 
+// Favorites and the registration's saved draft survive a refresh. They live in
+// this browser only (localStorage); Restart clears them. Storage can be blocked
+// (private mode, site data off), so every read and write is allowed to fail.
+const STORE_KEY = 'mxflow.recruiter.v1';
+const DRAFT_BLANK = { amount: '', startDate: PRESET_START, endDate: PRESET_END, postCounts: DEAL.posts.map(() => '') };
+const loadStore = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } };
+const saveStore = patch => { try { localStorage.setItem(STORE_KEY, JSON.stringify({ ...loadStore(), ...patch })); } catch (e) {} };
+const clearStore = () => { try { localStorage.removeItem(STORE_KEY); } catch (e) {} };
+const STORED = loadStore();
+
 class Component extends DCLogic {
   state = {
     screen: 'new', jobState: 'results', railOpen: false,
-    fav: {},
+    fav: STORED.fav || {},
     pop: null, plats: {}, themes: {}, verifiedOnly: false, hidePending: false, payOpen: false, draftSaved: false,
     detailWho: 'lillylucysisters', briefPromptOpen: false, briefDismissed: false,
     fFollowers: 'Any Followers', fEr: 'Any E/R', fComp: 'Competitor Product: All', sort: 'Sort: Relevance',
-    view: 'list', page: 1, amount: '', startDate: PRESET_START, endDate: PRESET_END, suggest: null,
-    postCounts: DEAL.posts.map(() => ''),
+    view: 'list', page: 1, suggest: null,
+    ...DRAFT_BLANK, ...STORED.draft,
     tbHidden: true, tbH: 0, // the toolbar starts hidden, as on Brief Curator
     region: 'All Regions', subs: 'All Subsidiaries', tier: 'All Tiers', pp: 'All Passion Points', fromPA: false,
     runPct: RUN_FROM
   };
-  _initial = { ...this.state }; // what Restart goes back to
+  _initial = { ...this.state, fav: {}, ...DRAFT_BLANK }; // what Restart goes back to: a clean demo
   syncProps() {
     const p = this.props;
     if (p.screen !== this._pScreen) { this._pScreen = p.screen; if (p.screen) this.state.screen = p.screen; }
@@ -6036,8 +6046,12 @@ class Component extends DCLogic {
     if (next) this.showView(next);
   }
   restart() {
+    clearStore();
     this.setState({ ...this._initial, tbHidden: this.state.tbHidden, tbH: this.state.tbH });
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  toggleFav(h) {
+    this.setState(st => ({ fav: { ...st.fav, [h]: !st.fav[h] } }), () => saveStore({ fav: this.state.fav }));
   }
   setToolbar(show) {
     this.setState({ tbHidden: !show }, () => {
@@ -6162,7 +6176,7 @@ class Component extends DCLogic {
         pl: CHAN.filter(ch => c.pl.includes(ch[0])).map(ch => ({ t: ch[1], icon: ch[2] })),
         csSeen: c.cs === 'seen', csUnclear: c.cs === 'unclear', csNone: c.cs !== 'seen' && c.cs !== 'unclear',
         fav: !!s.fav[c.h], favLabel: (s.fav[c.h] ? 'Remove ' : 'Add ') + c.n + (s.fav[c.h] ? ' from favorites' : ' to favorites'),
-        toggleFav: e => { e.stopPropagation(); this.setState(st => ({ fav: { ...st.fav, [c.h]: !st.fav[c.h] } })); },
+        toggleFav: e => { e.stopPropagation(); this.toggleFav(c.h); },
         open: (c.h === 'lillylucysisters' || c.h === 'kylenutt')
           ? () => this.setState({ screen: 'detail', detailWho: c.h }, () => { if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' }); })
           : () => {}
@@ -6235,9 +6249,9 @@ class Component extends DCLogic {
       payOpen: s.payOpen,
       openPay: () => this.setState({ payOpen: true }),
       closePay: () => this.setState({ payOpen: false }),
-      // demo only: nothing is stored; the button reads "Saved" for a moment, then goes back
+      // stores the draft in this browser (see STORE_KEY); the button reads "Saved" for a moment, then goes back
       draftSaved: s.draftSaved, draftIdle: !s.draftSaved, draftSavedAttr: String(!!s.draftSaved),
-      saveDraft: () => { clearTimeout(this._draftHold); this.setState({ draftSaved: true }); this._draftHold = setTimeout(() => this.setState({ draftSaved: false }), 2000); },
+      saveDraft: () => { clearTimeout(this._draftHold); saveStore({ draft: { amount: s.amount, startDate: s.startDate, endDate: s.endDate, postCounts: s.postCounts } }); this.setState({ draftSaved: true }); this._draftHold = setTimeout(() => this.setState({ draftSaved: false }), 2000); },
       isDetailZina: s.detailWho !== 'kylenutt', isDetailKyle: s.detailWho === 'kylenutt',
       detail: (() => {
         const id = IDENTITY[s.detailWho] || IDENTITY.lillylucysisters;
@@ -6246,7 +6260,7 @@ class Component extends DCLogic {
           igUrl: `https://www.instagram.com/${id.handle}/`,
           fav: !!s.fav[s.detailWho], favText: s.fav[s.detailWho] ? 'Favorited' : 'Favorite',
           favLabel: (s.fav[s.detailWho] ? 'Remove ' : 'Add ') + id.name + (s.fav[s.detailWho] ? ' from favorites' : ' to favorites'),
-          toggleFav: () => this.setState(st => ({ fav: { ...st.fav, [st.detailWho]: !st.fav[st.detailWho] } })),
+          toggleFav: () => this.toggleFav(s.detailWho),
           // only Zina's detail page can start a registration; kyle's Register button is inert
           onRegister: s.detailWho === 'lillylucysisters' ? () => this.setState({ payOpen: true }) : () => {}
         };
