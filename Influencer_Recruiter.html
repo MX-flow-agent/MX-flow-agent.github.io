@@ -2286,6 +2286,12 @@ function(a,b,c){if(!Vd(b))throw Error(m(200));return Wd(null,a,b,!1,c)};Q.unmoun
 .rc-fav--card { margin: -6px -6px 0 -6px; }
 @keyframes rc-fav-pop { 0% { transform: scale(.6); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .rc-fav[aria-pressed="true"] svg { animation: none; } }
+/* Save Draft: the button itself confirms, reading "Saved" for a moment. */
+.rc-draft-btn { flex: 0 0 auto; min-width: 124px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; line-height: 1.2; background: #fff; color: #263144; border: 1px solid #cecece; border-radius: 8px; font-size: 16px; font-weight: 500; transition: color 160ms, border-color 160ms, background 160ms; }
+.rc-draft-btn:hover { background: #F5F5F5; }
+.rc-draft-btn[data-saved="true"] { color: #1F9A31; border-color: #1F9A31; background: #fff; }
+.rc-draft-btn svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; animation: rc-fav-pop 280ms cubic-bezier(.2,.9,.3,1.3); }
+@media (prefers-reduced-motion: reduce) { .rc-draft-btn { transition: none; } .rc-draft-btn svg { animation: none; } }
 .rc-list > div { min-width: 1100px; }
 /* Pager: tighter spacing on phones, wrapping if it still doesn't fit. */
 @media (max-width: 600px) { .rc-pager > * { margin: 0 2px !important; } }
@@ -5469,7 +5475,10 @@ h1,h2,h3,p,dl,dd{margin:0}
           </span>
         </div>
         <sc-if value="{{ amountOk }}" hint-placeholder-val="{{ false }}"><p style="margin:-4px 0 12px"><span style="display:inline-flex;align-items:center;gap:6px;border-radius:1000px;padding:5px 12px;background:#D6FADC;color:#1F9A31;font-size:12px;line-height:1.4;font-weight:700"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style="display:block;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5 10 17.5 19 7"></path></svg>Within the recommended range</span></p></sc-if>
-        <button type="button" onClick="{{ goReg }}" style="width:100%;padding:12px 24px;line-height:1.2;background:#0380FE;color:#fff;border:0;border-radius:8px;font-size:16px;font-weight:500" style-hover="background:#176ED9">Register to MX MAP</button>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="rc-draft-btn" data-saved="{{ draftSavedAttr }}" onClick="{{ saveDraft }}"><sc-if value="{{ draftSaved }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"></path></svg><span role="status">Saved</span></sc-if><sc-if value="{{ draftIdle }}" hint-placeholder-val="{{ true }}">Save Draft</sc-if></button>
+          <button type="button" onClick="{{ goReg }}" style="flex:1;padding:12px 24px;line-height:1.2;background:#0380FE;color:#fff;border:0;border-radius:8px;font-size:16px;font-weight:500" style-hover="background:#176ED9">Register to MX MAP</button>
+        </div>
       </div>
     </div>
     </sc-if>
@@ -5942,20 +5951,30 @@ const maskDate = v => {
 };
 const isFullDate = v => /^\d{4}\.\d{2}\.\d{2}$/.test(String(v).trim());
 
+// Favorites and the registration's saved draft survive a refresh. They live in
+// this browser only (localStorage); Restart clears them. Storage can be blocked
+// (private mode, site data off), so every read and write is allowed to fail.
+const STORE_KEY = 'mxflow.recruiter.v1';
+const DRAFT_BLANK = { amount: '', startDate: PRESET_START, endDate: PRESET_END, postCounts: DEAL.posts.map(() => '') };
+const loadStore = () => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; } };
+const saveStore = patch => { try { localStorage.setItem(STORE_KEY, JSON.stringify({ ...loadStore(), ...patch })); } catch (e) {} };
+const clearStore = () => { try { localStorage.removeItem(STORE_KEY); } catch (e) {} };
+const STORED = loadStore();
+
 class Component extends DCLogic {
   state = {
     screen: 'new', jobState: 'results', railOpen: false,
-    fav: {},
-    pop: null, plats: {}, themes: {}, verifiedOnly: false, hidePending: false, payOpen: false,
+    fav: STORED.fav || {},
+    pop: null, plats: {}, themes: {}, verifiedOnly: false, hidePending: false, payOpen: false, draftSaved: false,
     detailWho: 'lillylucysisters', briefPromptOpen: false, briefDismissed: false,
     fFollowers: 'Any Followers', fEr: 'Any E/R', fComp: 'Competitor Product: All', sort: 'Sort: Relevance',
-    view: 'list', page: 1, amount: '', startDate: PRESET_START, endDate: PRESET_END, suggest: null,
-    postCounts: DEAL.posts.map(() => ''),
+    view: 'list', page: 1, suggest: null,
+    ...DRAFT_BLANK, ...STORED.draft,
     tbHidden: true, tbH: 0, // the toolbar starts hidden, as on Brief Curator
     region: 'All Regions', subs: 'All Subsidiaries', tier: 'All Tiers', pp: 'All Passion Points', fromPA: false,
     runPct: RUN_FROM
   };
-  _initial = { ...this.state }; // what Restart goes back to
+  _initial = { ...this.state, fav: {}, ...DRAFT_BLANK }; // what Restart goes back to: a clean demo
   syncProps() {
     const p = this.props;
     if (p.screen !== this._pScreen) { this._pScreen = p.screen; if (p.screen) this.state.screen = p.screen; }
@@ -6027,8 +6046,12 @@ class Component extends DCLogic {
     if (next) this.showView(next);
   }
   restart() {
+    clearStore();
     this.setState({ ...this._initial, tbHidden: this.state.tbHidden, tbH: this.state.tbH });
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+  toggleFav(h) {
+    this.setState(st => ({ fav: { ...st.fav, [h]: !st.fav[h] } }), () => saveStore({ fav: this.state.fav }));
   }
   setToolbar(show) {
     this.setState({ tbHidden: !show }, () => {
@@ -6153,7 +6176,7 @@ class Component extends DCLogic {
         pl: CHAN.filter(ch => c.pl.includes(ch[0])).map(ch => ({ t: ch[1], icon: ch[2] })),
         csSeen: c.cs === 'seen', csUnclear: c.cs === 'unclear', csNone: c.cs !== 'seen' && c.cs !== 'unclear',
         fav: !!s.fav[c.h], favLabel: (s.fav[c.h] ? 'Remove ' : 'Add ') + c.n + (s.fav[c.h] ? ' from favorites' : ' to favorites'),
-        toggleFav: e => { e.stopPropagation(); this.setState(st => ({ fav: { ...st.fav, [c.h]: !st.fav[c.h] } })); },
+        toggleFav: e => { e.stopPropagation(); this.toggleFav(c.h); },
         open: (c.h === 'lillylucysisters' || c.h === 'kylenutt')
           ? () => this.setState({ screen: 'detail', detailWho: c.h }, () => { if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'instant' }); })
           : () => {}
@@ -6226,6 +6249,9 @@ class Component extends DCLogic {
       payOpen: s.payOpen,
       openPay: () => this.setState({ payOpen: true }),
       closePay: () => this.setState({ payOpen: false }),
+      // stores the draft in this browser (see STORE_KEY); the button reads "Saved" for a moment, then goes back
+      draftSaved: s.draftSaved, draftIdle: !s.draftSaved, draftSavedAttr: String(!!s.draftSaved),
+      saveDraft: () => { clearTimeout(this._draftHold); saveStore({ draft: { amount: s.amount, startDate: s.startDate, endDate: s.endDate, postCounts: s.postCounts } }); this.setState({ draftSaved: true }); this._draftHold = setTimeout(() => this.setState({ draftSaved: false }), 2000); },
       isDetailZina: s.detailWho !== 'kylenutt', isDetailKyle: s.detailWho === 'kylenutt',
       detail: (() => {
         const id = IDENTITY[s.detailWho] || IDENTITY.lillylucysisters;
@@ -6234,7 +6260,7 @@ class Component extends DCLogic {
           igUrl: `https://www.instagram.com/${id.handle}/`,
           fav: !!s.fav[s.detailWho], favText: s.fav[s.detailWho] ? 'Favorited' : 'Favorite',
           favLabel: (s.fav[s.detailWho] ? 'Remove ' : 'Add ') + id.name + (s.fav[s.detailWho] ? ' from favorites' : ' to favorites'),
-          toggleFav: () => this.setState(st => ({ fav: { ...st.fav, [st.detailWho]: !st.fav[st.detailWho] } })),
+          toggleFav: () => this.toggleFav(s.detailWho),
           // only Zina's detail page can start a registration; kyle's Register button is inert
           onRegister: s.detailWho === 'lillylucysisters' ? () => this.setState({ payOpen: true }) : () => {}
         };
@@ -6276,8 +6302,11 @@ class Component extends DCLogic {
         pickSuggest: e => { e.preventDefault(); this.setState(st => { const next = st.postCounts.slice(); next[i] = String(p[2]); return { postCounts: next, suggest: null }; }); },
         setCount: e => this.setState(st => { const next = st.postCounts.slice(); next[i] = e.target.value.replace(/[^0-9]/g, '').slice(0, 3); return { postCounts: next }; })
       })),
-      // the green note shows for the suggested amount only, picked or typed
-      amountOk: Number(String(s.amount).replace(/[^0-9.]/g, '')) === AMOUNT_SUGGEST,
+      // the green note shows for any amount inside the recommended band (the chart's blue box), ends included
+      amountOk: (() => {
+        const v = Number(String(s.amount).replace(/[^0-9.]/g, ''));
+        return dealReady && String(s.amount).trim() !== '' && v >= PAY.recMin * postTotal && v <= PAY.recMax * postTotal;
+      })(),
       amountSuggest: num(AMOUNT_SUGGEST), amountSuggestOpen: s.suggest === 'amount',
       openAmountSuggest: () => this.setState({ suggest: 'amount' }),
       pickAmount: e => { e.preventDefault(); this.setState({ amount: num(AMOUNT_SUGGEST), suggest: null }); },
