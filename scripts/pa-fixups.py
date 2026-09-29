@@ -30,10 +30,13 @@ Fixes:
   recruiter-cta   the "Find candidates via Recruiter Agent" button under the
                   influencer list links where the chat's button does
   er-decimal      every E/R value shows one decimal (0.45% -> 0.5%)
+  gallery         popup Content Gallery shows only posts that have a thumbnail;
+                  an info tooltip says the thumbnails come from MX MAP
   rail-menu       AIM rail: MX FLOW brand in place of MX MAP; the three agents are
                   the top-level items (as in shared/flow-rail.js)
   css             the fx-fit stylesheet those hooks rely on
 """
+import json
 import re
 import sys
 from pathlib import Path
@@ -303,6 +306,37 @@ RAIL_BRAND = ('<div style="display:flex;flex-direction:column;gap:4px">'
               '<span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Influencer Marketing Agent Platform</span></div>')
 
 
+GALLERY_TIP = ("Thumbnails are imported from MX MAP's influencer Content Gallery. "
+               "Posts without a thumbnail there are not shown.")
+# A post has a thumbnail when the fetch shim can answer for it: an entry in
+# MX_THUMB_OVERRIDES (if this build has one) or a YouTube URL (i.ytimg.com).
+YT_ID = r'/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/|youtube\.com\/(?:embed|v|shorts)\/)[\w-]{11}/'
+
+
+def fix_gallery(s):
+    if 'Posts without a thumbnail there are not shown.' in s:
+        return s, False
+    tip = one(r'function (' + ID + r')\(\{text:e\}\)\{return (' + ID + r')\.jsx\(' + ID + r',\{text:e,children:\2\.jsx\(' + ID +
+              r',\{name:"IconInfoSizeMedium"', s, 'info tooltip').group(1)
+    norm = one(r'function (' + ID + r')\(e\)\{return e\.replace\(/\^https\?:\\/\\//,""\)\.replace\(/\\/\$/,""\)\.toLowerCase\(\)\}',
+               s, 'post URL normalizer').group(1)
+    m = one(r'(' + ID + r')\.jsx\("div",\{className:"mb-2 uppercase",style:\{\.\.\.(' + ID + r')\.caption,color:(' + ID +
+            r')\.muted,letterSpacing:"0\.04em"\},children:"Content Gallery"\}\),(' + ID + r')\.length===0\?\1\.jsx\("p",\{style:\{\.\.\.\2'
+            r'\.caption,color:\3\.muted\},children:"No tracked posts in the selected scope\."\}\):\1\.jsx\("div",\{className:"flex gap-3 '
+            r'overflow-x-auto pb-1",children:\4\.map\(\((' + ID + r'),(' + ID + r')\)=>\1\.jsx\((' + ID + r'),\{post:\5\},`\$\{\5\.uid\}-'
+            r'\$\{\6\}`\)\)\}\)', s, 'Content Gallery')
+    k, oe, ae, posts, l, i, card = m.groups()
+    pred = ('p=>{const u=p.postUrl||"";return u!=="#"&&(!!(typeof MX_THUMB_OVERRIDES<"u"&&MX_THUMB_OVERRIDES[' + norm +
+            '(u)])||' + YT_ID + '.test(u))}')
+    new = (k + '.jsxs("div",{className:"mb-2 flex items-center gap-1.5",style:{...' + oe + '.caption,color:' + ae + '.muted},children:[' +
+           k + '.jsx("span",{className:"uppercase",style:{letterSpacing:"0.04em"},children:"Content Gallery"}),' +
+           k + '.jsx(' + tip + ',{text:' + json.dumps(GALLERY_TIP) + '})]}),(fx=>fx.length===0?' +
+           k + '.jsx("p",{style:{...' + oe + '.caption,color:' + ae + '.muted},children:"No MX MAP gallery content in the selected scope."}):' +
+           k + '.jsx("div",{className:"flex gap-3 overflow-x-auto pb-1",children:fx.map((' + l + ',' + i + ')=>' + k + '.jsx(' + card +
+           ',{post:' + l + '},`${' + l + '.uid}-${' + i + '}`))}))(' + posts + '.filter(' + pred + '))')
+    return s[:m.start()] + new + s[m.end():], True
+
+
 def fix_rail_menu(s):
     if 'Influencer Marketing Agent Platform' in s:
         return s, False
@@ -336,7 +370,7 @@ FIXES = [
     ('portfolio', fix_portfolio), ('bars', fix_bars), ('deep-dive', fix_deep_dive),
     ('impact-column', fix_impact_column), ('top-bar', fix_top_bar), ('map-header', fix_map_header),
     ('long-list', fix_long_list), ('recruiter-cta', fix_recruiter_cta), ('er-decimal', fix_er_decimal),
-    ('rail-menu', fix_rail_menu), ('css', fix_css),
+    ('gallery', fix_gallery), ('rail-menu', fix_rail_menu), ('css', fix_css),
 ]
 
 
