@@ -29,6 +29,9 @@ Fixes:
   long-list       Long-list rows share one min width (aligned, full borders)
   recruiter-cta   the "Find candidates via Recruiter Agent" button under the
                   influencer list links where the chat's button does
+  er-decimal      every E/R value shows one decimal (0.45% -> 0.5%)
+  rail-menu       AIM rail: MX FLOW brand in place of MX MAP; the three agents are
+                  the top-level items (as in shared/flow-rail.js)
   css             the fx-fit stylesheet those hooks rely on
 """
 import re
@@ -264,6 +267,59 @@ def fix_recruiter_cta(s):
             'px-4 py-3 text-[13px] font-bold transition-opacity hover:opacity-90"' + m.group(3) + s[m.end():]), True
 
 
+# E/R sites formatted with toFixed(2), as (pattern with the digit in group 2, count).
+ER_SITES = [
+    (r'(label:"E/R",value:`\$\{[^`]{1,80}?\.toFixed\()([12])(\)\}%`)', 4),  # KPI, trend tooltip, detail, post popup
+    (r'(children:\[' + ID + r'\.er\.toFixed\()([12])(\),"%"\])', 1),  # Portfolio table cell
+    (r'("\u2014":`\$\{' + ID + r'\.er\.toFixed\()([12])(\)\}%`)', 1),  # Long-list row
+    (r'(function ' + ID + r'\(\{label:e,value:t,bad:a\}\)\{return .{0,400}?children:\[t\.toFixed\()([12])(\),"%"\])', 1),  # trend cards
+]
+# E/R written into the demo's canned text. 0.03% (Hugo's E/R) is left alone: 0.0% reads wrong.
+ER_TEXT = [('an E/R of 0.45%', 'an E/R of 0.5%'), ("E/R is lower (0.33%)", "E/R is lower (0.3%)"),
+           ('E/R growth to 0.92%', 'E/R growth to 0.9%')]
+
+
+def fix_er_decimal(s):
+    changed = False
+    for pat, n in ER_SITES:
+        found = list(re.finditer(pat, s))
+        if len(found) != n:
+            raise Missing(f'E/R format {pat[:40]}...: expected {n} matches, found {len(found)}')
+        for m in reversed(found):
+            if m.group(2) == '2':
+                s = s[:m.start(2)] + '1' + s[m.end(2):]
+                changed = True
+    for old, new in ER_TEXT:
+        if new in s:
+            continue
+        m = one(re.escape(old), s, 'E/R text ' + old)
+        s = s[:m.start()] + new + s[m.end():]
+        changed = True
+    return s, changed
+
+
+RAIL_BRAND = ('<div style="display:flex;flex-direction:column;gap:4px">'
+              '<span style="font:700 22px/1 SamsungSSHead,sans-serif;letter-spacing:.04em;color:#263144">MX FLOW</span>'
+              '<span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Influencer Marketing Agent Platform</span></div>')
+
+
+def fix_rail_menu(s):
+    if 'Influencer Marketing Agent Platform' in s:
+        return s, False
+    logo = one(r'<img src="\'\+' + ID + r'\+\'" height="24" alt="MX MAP">', s, 'rail logo')
+    s = s[:logo.start()] + RAIL_BRAND + s[logo.end():]
+    tops = one(r'<div style="color:#0380FE;font-size:12px;font-weight:500;line-height:1\.2;height:14px">Digital Performance Analysis</div>\'\+'
+               r'(' + ID + r')\("Social Marketing"\)\+\1\("PR Analysis"\)\+\1\("Influencer Marketing"\)\+', s, 'rail top items')
+    s = s[:tops.start()] + "'+" + s[tops.end():]
+    item = one(r'(function ' + ID + r'\((' + ID + r')\)\{var (' + ID + r')=\2\[0\]===' + ID + r';return\'<a href="\'\+\2\[2\]\+\'"\'\+\(\3\?\' aria-current="page"\':""\)\+\' style=")'
+               r'display:flex;align-items:center;gap:8px;padding-left:29px;height:32px;font-size:16px;font-weight:\'\+\(\3\?700:500\)\+'
+               r'(";border-radius:4px"\+\(\3\?";color:#0380FE;background:#E6F2FE":""\)\+\'">)'
+               r'<span style="width:4px;height:4px;border-radius:50%;background:\'\+\(\3\?"#0380FE":"#CECECE"\)\+\'"></span>\'\+', s, 'rail page item')
+    new = (item.group(1) + "display:flex;align-items:center;margin-top:8px;padding-left:40px;height:40px;font-size:18px;font-weight:'+(" +
+           item.group(3) + '?700:500)+' + item.group(4) + "'+")
+    return s[:item.start()] + new + s[item.end():], True
+
+
 def fix_css(s):
     block = re.search(r'<style id="fx-fit">.*?</style>', s, re.S)
     if block:
@@ -279,7 +335,8 @@ FIXES = [
     ('kpi-cards', fix_kpi_cards), ('trend-cards', fix_trend_cards), ('legend', fix_legend),
     ('portfolio', fix_portfolio), ('bars', fix_bars), ('deep-dive', fix_deep_dive),
     ('impact-column', fix_impact_column), ('top-bar', fix_top_bar), ('map-header', fix_map_header),
-    ('long-list', fix_long_list), ('recruiter-cta', fix_recruiter_cta), ('css', fix_css),
+    ('long-list', fix_long_list), ('recruiter-cta', fix_recruiter_cta), ('er-decimal', fix_er_decimal),
+    ('rail-menu', fix_rail_menu), ('css', fix_css),
 ]
 
 
