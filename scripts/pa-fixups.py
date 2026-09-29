@@ -302,7 +302,7 @@ def fix_er_decimal(s):
 
 
 RAIL_BRAND = ('<div style="display:flex;flex-direction:column;gap:4px">'
-              '<span style="font:700 22px/1 SamsungSSHead,sans-serif;letter-spacing:.04em;color:#263144">MX FLOW</span>'
+              '<span style="font:700 22px/1 Samsung SS Head,SamsungSSHead,sans-serif;letter-spacing:.04em;color:#263144">MX FLOW</span>'
               '<span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Influencer Marketing Agent Platform</span></div>')
 
 
