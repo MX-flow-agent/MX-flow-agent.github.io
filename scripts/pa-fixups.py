@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-apply the Influencer Master fixups to Performance Analyst's exported build.
+"""Re-apply the Influencer Master Agent fixups to Performance Analyst's exported build.
 
 PA-demo-v4.html is a compiled single-file export of the mix-modeler-lab demo.
 Every re-export replaces the bundle and drops edits made to the built file, so
@@ -33,7 +33,7 @@ Fixes:
   gallery         popup Content Gallery shows only posts that have a thumbnail;
                   an info tooltip says the thumbnails come from MX MAP
   disclaimer      page-foot disclaimer: generic wording, not the workbook-upload notes
-  rail-menu       AIM rail: Influencer Master brand in place of MX MAP; the three agents are
+  rail-menu       AIM rail: Influencer Master Agent brand in place of MX MAP; the three agents are
                   the top-level items (as in shared/flow-rail.js)
   css             the fx-fit stylesheet those hooks rely on
 """
@@ -303,8 +303,8 @@ def fix_er_decimal(s):
 
 
 RAIL_BRAND = ('<div style="display:flex;flex-direction:column;gap:4px">'
-              '<span style="font:700 22px/1 Samsung SS Head,SamsungSSHead,sans-serif;color:#263144">Influencer Master</span>'
-              '<span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Samsung Electronics Agent Platform</span></div>')
+              '<span style="font:700 22px/1 Samsung SS Head,SamsungSSHead,sans-serif;color:#263144">Influencer Master Agent</span>'
+              '<span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Samsung Electronics Marketing Platform</span></div>')
 
 
 GALLERY_TIP = ("Thumbnails are imported from MX MAP's influencer Content Gallery. "
@@ -351,7 +351,7 @@ def fix_disclaimer(s):
 
 
 def fix_rail_menu(s):
-    if 'Samsung Electronics Agent Platform' in s:
+    if 'Samsung Electronics Marketing Platform' in s:
         return s, False
     logo = one(r'<img src="\'\+' + ID + r'\+\'" height="24" alt="MX MAP">', s, 'rail logo')
     s = s[:logo.start()] + RAIL_BRAND + s[logo.end():]

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Influencer Master</title>
-<!-- Influencer Master · entry point. Hosts the flow in one full-window frame and
+<title>Influencer Master Agent</title>
+<!-- Influencer Master Agent · entry point. Hosts the flow in one full-window frame and
      mirrors where the frame is into this page's address, so a refresh or a
      shared link reopens the same agent and screen:
        /#pa                 Performance Analyst (the default)
@@ -26,7 +26,7 @@
   // screen this page asks for.
   var flow = document.createElement('iframe');
   flow.id = 'flow';
-  flow.title = 'Influencer Master';
+  flow.title = 'Influencer Master Agent';
   flow.name = 'flow-' + Date.now().toString(36) + Math.random().toString(36).slice(2);
   var PAGES = { pa: 'PA-demo-v4.html', recruiter: 'Influencer_Recruiter.html', brief: 'Brief_Curator.html' };
   // Views that move on by themselves; Back never stops on them.
@@ -78,7 +78,7 @@
   }
 
   flow.addEventListener('load', function () {
-    try { document.title = flow.contentDocument.title || 'Influencer Master'; } catch (e) {}
+    try { document.title = flow.contentDocument.title || 'Influencer Master Agent'; } catch (e) {}
     try { flow.contentWindow.focus(); } catch (e) {} // keyboard shortcuts work without a first click
     try {
       var w = flow.contentWindow;

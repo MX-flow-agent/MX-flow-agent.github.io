@@ -1,4 +1,4 @@
-/* Influencer Master · AIM rail — the sidebar Influencer_Recruiter.html draws in its
+/* Influencer Master Agent · AIM rail — the sidebar Influencer_Recruiter.html draws in its
    own template, rebuilt once for the pages that don't have one. Same markup,
    sizes and colours; same behaviour: a 400px panel that pushes the page right
    rather than covering it, closed only by its ✕.
@@ -50,7 +50,7 @@
   rail.innerHTML =
     '<div style="display:flex;align-items:center;gap:8px;height:67px;padding:0 12px;box-sizing:border-box;border-bottom:1px solid #CECECE;flex:0 0 auto">' +
       '<button type="button" class="flow-rail__icon" data-flow-rail="close" aria-label="Close"><img src="' + ICON_CLOSE + '" width="24" height="24" alt=""></button>' +
-      '<div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 22px/1 Samsung SS Head,SamsungSSHead,sans-serif;color:#263144">Influencer Master</span><span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Samsung Electronics Agent Platform</span></div>' +
+      '<div style="display:flex;flex-direction:column;gap:4px"><span style="font:700 22px/1 Samsung SS Head,SamsungSSHead,sans-serif;color:#263144">Influencer Master Agent</span><span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Samsung Electronics Marketing Platform</span></div>' +
     '</div>' +
     '<nav style="padding:14px 12px;overflow:auto">' +
       PAGES.map(item).join('') +
