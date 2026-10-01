@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-apply the Flow Agent fixups to Performance Analyst's exported build.
+"""Re-apply the Influencer Master fixups to Performance Analyst's exported build.
 
 PA-demo-v4.html is a compiled single-file export of the mix-modeler-lab demo.
 Every re-export replaces the bundle and drops edits made to the built file, so
@@ -32,7 +32,8 @@ Fixes:
   er-decimal      every E/R value shows one decimal (0.45% -> 0.5%)
   gallery         popup Content Gallery shows only posts that have a thumbnail;
                   an info tooltip says the thumbnails come from MX MAP
-  rail-menu       AIM rail: MX FLOW brand in place of MX MAP; the three agents are
+  disclaimer      page-foot disclaimer: generic wording, not the workbook-upload notes
+  rail-menu       AIM rail: Influencer Master brand in place of MX MAP; the three agents are
                   the top-level items (as in shared/flow-rail.js)
   css             the fx-fit stylesheet those hooks rely on
 """
@@ -302,8 +303,8 @@ def fix_er_decimal(s):
 
 
 RAIL_BRAND = ('<div style="display:flex;flex-direction:column;gap:4px">'
-              '<span style="font:700 22px/1 Samsung SS Head,SamsungSSHead,sans-serif;letter-spacing:.04em;color:#263144">MX FLOW</span>'
-              '<span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Influencer Marketing Agent Platform</span></div>')
+              '<span style="font:700 22px/1 Samsung SS Head,SamsungSSHead,sans-serif;color:#263144">Influencer Master</span>'
+              '<span style="font-size:12px;font-weight:500;line-height:1.2;color:#0380FE">Samsung Electronics Agent Platform</span></div>')
 
 
 GALLERY_TIP = ("Thumbnails are imported from MX MAP's influencer Content Gallery. "
@@ -337,8 +338,20 @@ def fix_gallery(s):
     return s[:m.start()] + new + s[m.end():], True
 
 
+DISCLAIMER = ["Figures are estimates based on tracked influencer content and may differ from platform-reported metrics.",
+              "AI-generated insights are for reference only and should be verified before use."]
+
+
+def fix_disclaimer(s):
+    new = '"disclaimer":' + json.dumps(DISCLAIMER)
+    if new in s:
+        return s, False
+    m = one(r'"disclaimer":\["Figures are calculated from[^\]]*\]', s, 'disclaimer copy')
+    return s[:m.start()] + new + s[m.end():], True
+
+
 def fix_rail_menu(s):
-    if 'Influencer Marketing Agent Platform' in s:
+    if 'Samsung Electronics Agent Platform' in s:
         return s, False
     logo = one(r'<img src="\'\+' + ID + r'\+\'" height="24" alt="MX MAP">', s, 'rail logo')
     s = s[:logo.start()] + RAIL_BRAND + s[logo.end():]
@@ -370,7 +383,7 @@ FIXES = [
     ('portfolio', fix_portfolio), ('bars', fix_bars), ('deep-dive', fix_deep_dive),
     ('impact-column', fix_impact_column), ('top-bar', fix_top_bar), ('map-header', fix_map_header),
     ('long-list', fix_long_list), ('recruiter-cta', fix_recruiter_cta), ('er-decimal', fix_er_decimal),
-    ('gallery', fix_gallery), ('rail-menu', fix_rail_menu), ('css', fix_css),
+    ('gallery', fix_gallery), ('disclaimer', fix_disclaimer), ('rail-menu', fix_rail_menu), ('css', fix_css),
 ]
 
 
